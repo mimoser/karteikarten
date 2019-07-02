@@ -12,7 +12,8 @@ const userSchema = mongoose.Schema({
     passwordHash: {
         type: String,
         required: true,
-    }
+    },
+    
 });
 
 userSchema.methods.validPassword = function (password) {

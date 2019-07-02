@@ -1,15 +1,17 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Dashboard from './views/Dashboard.vue'
+import { store } from './store/store';
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     {
-      path: '/',
+      path: '/dashboard',
       name: 'dashboard',
       component: Dashboard
+      // component: () => import(/* webpackChunkName: "dashboard" */ './views/Dashboard.vue')      
     },
     {
       path: '/about',
@@ -34,7 +36,36 @@ export default new Router({
       name: 'logout',
       component: () => import(/* webpackChunkName: "logout" */ './views/Logout.vue')
     }
-    
+
   ],
   mode: 'history'
-})
+});
+
+router.beforeEach((to, from, next) => {
+  // store.dispatch('retrieveToken');
+
+  if (to.fullPath === '/') {
+    if (!store.state.accessToken) {
+      next('/login');
+    }
+  }
+  if (to.fullPath === '/dashboard') {
+    if (!store.state.accessToken) {
+      next('/login');
+    }
+  }
+  if (to.fullPath === '/login') {
+    if (store.state.accessToken) {
+      next('/dashboard');
+    }
+  }
+  if (to.fullPath === '/register') {
+    if (store.state.accessToken) {
+      next('/dashboard');
+    }
+  }
+  next();
+});
+
+
+export default router;

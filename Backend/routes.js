@@ -39,7 +39,7 @@ router.post('/register', [check('email').isEmail(), check('password').isLength({
     }).then(function (user) {
         if (user) {
             res.status(500).json({
-                error: 'Account with this email already exists.',
+                error: 'Account with this email already exists.'
             });
         } else {
             // create user
@@ -49,8 +49,19 @@ router.post('/register', [check('email').isEmail(), check('password').isLength({
             });
 
             newUser.save().then(function (savedUser) {
-                res.status(200).json({
-                    success: 'Account successfully registered.',
+
+                token = savedUser.generateJwt();
+                res.status(200);
+                res.json({
+                    'access_token': token,
+                });
+
+                // res.status(200).json({
+                //     success: 'Account successfully registered.'
+                // });
+            }).catch(function (error) {
+                res.status(500).json({
+                    error: 'Error while creating new user account.'
                 });
             });
         }
@@ -76,7 +87,7 @@ router.post('/login', function (req, res) {
             token = user.generateJwt();
             res.status(200);
             res.json({
-                'token': token,
+                'access_token': token,
             });
         } else {
             // user not found
@@ -87,16 +98,20 @@ router.post('/login', function (req, res) {
     })(req, res);
 });
 
-router.get('/test', auth, (req, res) => {
-    console.log(req);
-    res.status(200);
-    res.send("Hello World!");
+
+router.post('/logout', (req, res) => {
+    req.logout();
+    return res.status(200).send('logout success');
 });
 
-router.get('/logout', (req, res) => {
-    req.logout();
-    console.log("logged out");
-    return res.send('Logged out');
+// test
+router.get('/test', auth, (req, res) => {
+    res.status(200);
+    res.send("auth success");
+});
+
+router.get('/test2', (req, res) => {
+    res.status(200).send("no auth test");
 });
 
 module.exports = router;

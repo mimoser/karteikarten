@@ -5,17 +5,22 @@ import axios from 'axios';
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
+    namespaced: true,
     state: {
-        user: localStorage.getItem('access_token') || null,
+        user: null,
+        accessToken: localStorage.getItem('access_token') || null
     },
     getters: {
-        user(state) {
-            return state.user;
+        isLoggedIn(state) {
+            return state.accessToken;
         }
     },
     mutations: {
-        user(state, payload) {
-            state.user = payload.user;
+        retrieveToken(state, payload) {
+            state.accessToken = payload;
+        },
+        destroyToken(state){
+            state.accessToken = null;
         }
     },
     actions: {
@@ -26,39 +31,59 @@ export const store = new Vuex.Store({
                     password: credentials.password,
                 }).then(response => {
                     const token = response.data.access_token;
-
                     localStorage.setItem('access_token', token);
                     context.commit('retrieveToken', token);
-                    console.log(response);
+                    // alert(response.data);
+                    // eslint-disable-next-line
                     resolve(response);
                     // context.commit('addTodo', response.data)
                 }).catch(error => {
-                    console.log(error);
+                    // eslint-disable-next-line
                     reject(error);
                 })
             })
         },
         destroyToken(context) {
-            axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.token
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
 
-            if (context.getters.user) {
+            if (context.getters.isLoggedIn) {
                 return new Promise((resolve, reject) => {
-                    debugger;
-                    axios.get('http://localhost:3000/logout')
+                    axios.post('http://localhost:3000/logout')
                         .then(response => {
                             localStorage.removeItem('access_token')
                             context.commit('destroyToken')
-                            console.log(response);
+                            // eslint-disable-next-line
                             resolve(response)
                             // context.commit('addTodo', response.data)
                         })
                         .catch(error => {
                             localStorage.removeItem('access_token')
+                            // eslint-disable-next-line
+
                             context.commit('destroyToken')
                             reject(error)
                         })
                 })
             }
         },
+        register(context, credentials){
+            return new Promise((resolve, reject) => {
+                axios.post('http://localhost:3000/register', {
+                    email: credentials.email,
+                    password: credentials.password,
+                }).then(response => {
+                    const token = response.data.access_token;
+                    localStorage.setItem('access_token', token);
+                    context.commit('retrieveToken', token);
+                    // alert(response.data);
+                    // eslint-disable-next-line
+                    resolve(response);
+                    // context.commit('addTodo', response.data)
+                }).catch(error => {
+                    // eslint-disable-next-line
+                    reject(error);
+                })
+            })
+        }
     }
 });

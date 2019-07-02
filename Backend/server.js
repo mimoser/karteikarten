@@ -31,7 +31,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // connect to mongodb
-mongoose.Promise = global.Promise;
+// mongoose.Promise = global.Promise; // angeblich seit Version 5 nicht mehr nötig
 mongoose.connect(keys.mongodb.dbURI, {
   useNewUrlParser: true,
   keepAlive: true,

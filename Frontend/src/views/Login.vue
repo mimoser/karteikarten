@@ -1,40 +1,56 @@
 <template>
-  <div>
+  <b-container fluid>
     <h2>Login</h2>
-    <form v-on:submit="login">
-      <input type="email" name="email" v-model="email">
-      <br>
-      <input type="password" name="password" v-model="password">
-      <br>
-      <input type="submit" value="Login">
-    </form>
-  </div>
+    <b-form-row class="justify-content-center">
+      <b-col md="auto">
+        <b-form v-on:submit="login">
+          <b-form-group>
+            <b-form-input type="email" name="email" v-model="email" placeholder="Enter your email" />
+            <br />
+            <b-form-input
+              type="password"
+              name="password"
+              v-model="password"
+              placeholder="Enter your password"
+            />
+            <br />
+            <b-button type="submit" variant="primary">Login</b-button>
+          </b-form-group>
+        </b-form>
+      </b-col>
+    </b-form-row>
+  </b-container>
 </template>
 
 <script>
 import router from "../router";
 import axios from "axios";
+
 // import store from '../store/store';
 
 export default {
   name: "Login",
   data() {
     return {
-      email: '',
-      password: ''
-    }
+      email: "",
+      password: ""
+    };
   },
   methods: {
-    login() {
+    login(e) {
+      e.preventDefault();
+
       this.$store
         .dispatch("retrieveToken", {
           email: this.email,
           password: this.password
         })
         .then(response => {
+          // alert(response.data.access_token);
           this.$router.push({ name: "dashboard" });
-        }).catch(error => {
-          console.log(error);
+        })
+        .catch(error => {
+          // eslint-disable-next-line
         });
     }
   }

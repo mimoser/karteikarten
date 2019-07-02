@@ -1,10 +1,12 @@
-<template></template>
+<template>
+  <div></div>
+</template>
 
 <script>
 export default {
   created() {
-    debugger;
-    this.$store.dispatch("destroyToken").then(response => {
+    this.$store.dispatch('destroyToken').then(response => {
+      // eslint-disable-next-line
       this.$router.push({ name: "login" });
     });
   }
