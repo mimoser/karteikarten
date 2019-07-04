@@ -14,8 +14,11 @@
           <b-nav-item v-if="!user">
             <router-link class="nav-item nav-link" to="/register">Register</router-link>
           </b-nav-item>
-          <b-nav-item>
-            <router-link class="nav-item nav-link" to="/about">About</router-link>
+          <b-nav-item v-if="user">
+            <router-link class="nav-item nav-link" to="/mydecks">My Decks</router-link>
+          </b-nav-item>
+          <b-nav-item v-if="user">
+            <router-link class="nav-item nav-link" to="/profile">Profile</router-link>
           </b-nav-item>
           <b-nav-item v-if="user">
             <router-link class="nav-item nav-link" to="/logout">Logout</router-link>

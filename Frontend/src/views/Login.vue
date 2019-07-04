@@ -14,7 +14,7 @@
               placeholder="Enter your password"
             />
             <br />
-            <b-button type="submit" variant="primary">Login</b-button>
+            <b-button type="submit" variant="dark">Login</b-button>
           </b-form-group>
         </b-form>
       </b-col>
@@ -51,6 +51,7 @@ export default {
         })
         .catch(error => {
           // eslint-disable-next-line
+            console.log(error);
         });
     }
   }

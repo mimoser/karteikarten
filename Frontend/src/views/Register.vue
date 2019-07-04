@@ -14,7 +14,7 @@
               placeholder="Enter your password"
             />
             <br />
-            <b-button type="submit" variant="primary">Register</b-button>
+            <b-button type="submit" variant="dark">Register</b-button>
           </b-form-group>
         </b-form>
       </b-col>
@@ -33,19 +33,35 @@ export default {
   },
   methods: {
     register(e) {
-        e.preventDefault();
-        this.$store
-          .dispatch("register", {
-            email: this.email,
-            password: this.password
-          })
-          .then(response => {
-            // alert(response.data.access_token);
-            this.$router.push({ name: "dashboard" });
-          })
-          .catch(error => {
-            // eslint-disable-next-line
+      e.preventDefault();
+      this.$store
+        .dispatch("register", {
+          email: this.email,
+          password: this.password
+        })
+        .then(response => {
+          // alert(response.data.access_token);
+          this.$bvToast.toast(`Account created successfully`, {
+            title: "Registration succeeded",
+            variant: 'info',
+            toaster: 'b-toaster-top-center',
+            autoHideDelay: 5000,
+            appendToast: true
           });
+          this.$router.push({ name: "dashboard" });
+        })
+        .catch(error => {
+          this.$bvToast.toast(`${error.response.data.error}`, {
+            title: "Registration failed",
+            variant: 'warning',
+            toaster: 'b-toaster-top-center',
+            autoHideDelay: 5000,
+            appendToast: true
+          });
+
+          // eslint-disable-next-line
+          console.log(error);
+        });
     }
   }
 };

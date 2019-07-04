@@ -5,10 +5,12 @@
 <script>
 export default {
   created() {
-    this.$store.dispatch('destroyToken').then(response => {
-      // eslint-disable-next-line
-      this.$router.push({ name: "login" });
-    });
+    if(confirm("Willst du dich wirklich ausloggen?")){
+      this.$store.dispatch('destroyToken').then(response => {
+        // eslint-disable-next-line
+        this.$router.push({ name: "login" });
+      });
+    } 
   }
 };
 </script>

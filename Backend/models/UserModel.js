@@ -4,6 +4,19 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const keys = require('../config/keys');
 
+const Card = mongoose.Schema({
+    content: String
+});
+
+const Deck = mongoose.Schema({
+    owner: Number,
+    name: String,
+    cards: [Card],
+    isPublic: Boolean,
+    averageRating: Number,
+    subscribers: Number // determines how many users subscribed to this deck
+});
+
 const userSchema = mongoose.Schema({
     email: {
         type: String,
@@ -13,8 +26,9 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    
+    decks: [Deck],
 });
+
 
 userSchema.methods.validPassword = function (password) {
     return bcrypt.compareSync(password, this.passwordHash);

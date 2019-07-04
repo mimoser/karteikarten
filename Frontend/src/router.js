@@ -1,9 +1,9 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import Dashboard from './views/Dashboard.vue'
+import Vue from 'vue';
+import Router from 'vue-router';
+import Dashboard from './views/Dashboard.vue';
 import { store } from './store/store';
 
-Vue.use(Router)
+Vue.use(Router);
 
 const router = new Router({
   routes: [
@@ -14,12 +14,17 @@ const router = new Router({
       // component: () => import(/* webpackChunkName: "dashboard" */ './views/Dashboard.vue')      
     },
     {
-      path: '/about',
-      name: 'about',
+      path: '/profile',
+      name: 'profile',
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+      component: () => import(/* webpackChunkName: "profile" */ './views/Profile.vue')
+    },
+    {
+      path: '/mydecks',
+      name: 'mydecks',
+      component: () => import(/* webpackChunkName: "mydecks" */ './views/MyDecks.vue')
     },
     {
       path: '/login',
@@ -54,6 +59,11 @@ router.beforeEach((to, from, next) => {
       next('/login');
     }
   }
+  if (to.fullPath === '/mydecks') {
+    if (!store.state.accessToken) {
+      next('/login');
+    }
+  }
   if (to.fullPath === '/login') {
     if (store.state.accessToken) {
       next('/dashboard');
@@ -66,6 +76,20 @@ router.beforeEach((to, from, next) => {
   }
   next();
 });
+
+// router.afterEach((to, from, next) => {
+//   if (to.fullPath === '/dashboard' && from.fullPath === '/register'){
+//     debugger;
+//     console.log(Dashboard);
+//     // this.$bvToast.toast(`Account created successfully`, {
+//     //   title: "Registration succeeded",
+//     //   variant: 'info',
+//     //   toaster: 'b-toaster-top-center',
+//     //   autoHideDelay: 5000,
+//     //   appendToast: true
+//     // });
+//   }
+// });
 
 
 export default router;
