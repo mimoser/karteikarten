@@ -2,7 +2,7 @@
   <b-container fluid>
     <b-row>
       <b-col>
-        <vue-editor v-model="content"></vue-editor>
+        <vue-editor v-model="content" useCustomHandler @imageAdded="handleImageAdded"></vue-editor>
       </b-col>
     </b-row>
   </b-container>
@@ -23,7 +23,10 @@ export default {
   },
 
   methods: {
-    
+    handleImageAdded: function (file, Editor, cursorLocation, resetUploader){
+      debugger;
+      console.log(file);
+    }
   }
 };
 </script>

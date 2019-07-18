@@ -21,6 +21,9 @@ export const store = new Vuex.Store({
         },
         destroyToken(state){
             state.accessToken = null;
+        },
+        setUser(state, user){
+            state.user = user;
         }
     },
     actions: {
@@ -73,8 +76,10 @@ export const store = new Vuex.Store({
                     password: credentials.password,
                 }).then(response => {
                     const token = response.data.access_token;
+                    const userId = response.data.userId;
+                    localStorage.setItem('userId', userId);
                     localStorage.setItem('access_token', token);
-                    context.commit('retrieveToken', token);
+                    context.commit('setUser');
                     // alert(response.data);
                     // eslint-disable-next-line
                     resolve(response);

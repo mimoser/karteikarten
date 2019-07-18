@@ -23,12 +23,12 @@
         </b-col>
       </b-row>
     </b-container>
-  </div>-->
+  </div> -->
   <div>
     <b-container fluid>
       <b-row>
         <b-col>
-          <b-form-group label="Filter">
+          <b-form-group>
             <b-input-group>
               <b-form-input v-model="filter" placeholder="Type to Search"></b-form-input>
               <b-input-group-append>
@@ -48,8 +48,12 @@
             :filter="filter"
             :current-page="currentPage"
             small
+            responsive
+            striped
             thead-class="hidden_header"
-          ></b-table>
+            @filtered="onFiltered"
+          >
+          <span slot="html" slot-scope="data" v-html="data.value"></span></b-table>
         </b-col>
       </b-row>
       <b-row>
@@ -68,8 +72,8 @@
 </template>
 
 <script>
-import Editor from "../components/KartenEditor";
-import fakedata from "../fakedata/fakedata";
+import Editor from "../components/CardEditor";
+const fake = require('../fakedata/fakedata').fake;
 
 export default {
   components: {
@@ -79,13 +83,13 @@ export default {
     return {
       perPage: 3,
       currentPage: 1,
-      items: fakedata,
+      items: fake.fakeData(),
       fields: [
         { key: "id", label: "", thClass: "d-none", tdClass: "d-none" },
-        { key: "bezeichnung", label: "" },
-        { key: "autor", label: "" },
-        { key: "anzahl_karten", label: "" },
-        { key: "bewertung", label: "" }
+        { key: "html", label: "" },
+        // { key: "owner", label: "" },
+        // { key: "numberOfCards", label: "" },
+        // { key: "averageRating", label: "" }
       ],
       filter: null
     };
@@ -102,6 +106,9 @@ export default {
         autoHideDelay: 3000,
         appendToast: true
       });
+    },
+    onFiltered: function() {
+      this.currentPage = 1;
     }
   }
 };
