@@ -40,6 +40,11 @@ const router = new Router({
       path: '/logout',
       name: 'logout',
       component: () => import(/* webpackChunkName: "logout" */ './views/Logout.vue')
+    },
+    {
+      path: '/forgotPassword',
+      name: 'forgotPassword',
+      component: () => import(/* webpackChunkName: "forgotPassword" */ './views/ForgotPassword.vue')
     }
 
   ],

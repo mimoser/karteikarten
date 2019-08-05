@@ -34,7 +34,10 @@ export const store = new Vuex.Store({
                     password: credentials.password,
                 }).then(response => {
                     const token = response.data.access_token;
+                    const userId = response.data.userId;
+                    localStorage.setItem('userId', userId);
                     localStorage.setItem('access_token', token);
+
                     context.commit('retrieveToken', token);
                     // alert(response.data);
                     // eslint-disable-next-line
@@ -74,12 +77,13 @@ export const store = new Vuex.Store({
                 axios.post('http://localhost:3000/register', {
                     email: credentials.email,
                     password: credentials.password,
+                    username: credentials.username,
                 }).then(response => {
-                    const token = response.data.access_token;
-                    const userId = response.data.userId;
-                    localStorage.setItem('userId', userId);
-                    localStorage.setItem('access_token', token);
-                    context.commit('setUser');
+                    // const token = response.data.access_token;
+                    // const userId = response.data.userId;
+                    // localStorage.setItem('userId', userId);
+                    // localStorage.setItem('access_token', token);
+                    // context.commit('setUser');
                     // alert(response.data);
                     // eslint-disable-next-line
                     resolve(response);

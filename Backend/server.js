@@ -9,6 +9,10 @@ const mongoose = require('mongoose');
 const keys = require('./config/keys');
 const bodyParser = require('body-parser');
 
+// environment variables from .env file
+// console.log(require('dotenv').config());
+require('dotenv').config();
+
 const app = express();
 // app.use(expressValidator());
 

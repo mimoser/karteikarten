@@ -9,6 +9,12 @@ const jwt = require('express-jwt');
 const keys = require('./config/keys');
 const { check, validationResult } = require('express-validator');
 
+const passwordGenerator = require('generate-password');
+
+const mailer = require('./mailHelpers');
+
+
+
 const auth = jwt({
     secret: keys.jwtsecret,
     userProperty: 'payload',
@@ -35,27 +41,30 @@ router.post('/register', [check('email').isEmail(), check('password').isLength({
 
     const email = req.body.email;
     const password = req.body.password;
+    const username = req.body.username;
 
     User.findOne({
-        email: req.body.email,
+        $or: [{ email: req.body.email }, { name: username }]
     }).then(function (user) {
         if (user) {
             res.status(500).json({
-                error: 'Account with this email already exists.'
+                error: `Account with this ${(user.email === email)? "email":"username"} already exists.`
             });
         } else {
             // create user
             const newUser = new User({
                 email: email,
                 password: password, // passwordHash is saved instead of plaintext password
+                name: username
             });
 
             newUser.save().then(function (savedUser) {
 
+                mailer.sendRegistrationSuccess({ email: email, username: username });
+
                 token = savedUser.generateJwt();
                 res.status(200);
                 res.json({
-                    'userId': savedUser.id,
                     'access_token': token,
                 });
 
@@ -170,7 +179,7 @@ router.get('/deck', auth, (req, res) => {
         match: { email: req.payload.email }
     }).populate('cards').then(deck => {
         // deck.populate('cards');
-        if(deck){
+        if (deck) {
             res.status(200).send({
                 cards: deck.cards,
                 isPublic: deck.isPublic,
@@ -195,7 +204,7 @@ router.put('/deck', auth, (req, res) => {
         path: 'owner',
         match: { email: req.payload.email }
     }).then(deck => {
-        if(deck){
+        if (deck) {
             console.log(deck);
             let updatedCards = new Array();
             req.body.cards.forEach(card => {
@@ -204,11 +213,11 @@ router.put('/deck', auth, (req, res) => {
                 updatedCards.push(new Card(c));
             });
             deck.cards.forEach(card => {
-                Card.findOne({_id: card._id}).exec().then(c => {
+                Card.findOne({ _id: card._id }).exec().then(c => {
                     c.remove();
                 });
             });
-    
+
             deck.cards = updatedCards;
             deck.save().then(savedDeck => {
                 res.status(200).json({
@@ -220,7 +229,7 @@ router.put('/deck', auth, (req, res) => {
                 });
             })
         } else {
-            res.sendStatus(404);    
+            res.sendStatus(404);
         }
     }, error => {
         console.log(error);
@@ -230,8 +239,8 @@ router.put('/deck', auth, (req, res) => {
 // returns public decks
 // the returned deck, contains no cards, since it's only for the dashboard view
 router.get('/publicDecks', auth, (req, res) => {
-    Deck.find({isPublic: true}).populate('owner', 'email').populate('cards').exec().then(publicDecks => {
-        if(publicDecks){
+    Deck.find({ isPublic: true }).populate('owner', 'email').populate('cards').exec().then(publicDecks => {
+        if (publicDecks) {
             console.log(publicDecks);
             let decks = new Array();
             publicDecks.forEach(deck => {
@@ -245,7 +254,7 @@ router.get('/publicDecks', auth, (req, res) => {
                 }
                 decks.push(d);
             })
-            res.status(200).json({"decks": decks});
+            res.status(200).json({ "decks": decks });
         } else {
             res.sendStatus(404);
         }
@@ -254,5 +263,36 @@ router.get('/publicDecks', auth, (req, res) => {
         res.status(500).send(error);
     });
 });
+
+// initiates password resetting process
+router.post('/resetPassword', [check('email').isEmail()], (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const email = req.body.email;
+
+    User.findOne({
+        email: req.body.email,
+    }).then(function (user) {
+        if (user) {
+            let temporaryPassword = passwordGenerator.generate({
+                length: 8,
+                numbers: true,
+            });
+
+            user.password = temporaryPassword;
+            user.save();
+            mailer.sendPasswordReset(email, temporaryPassword);
+
+        } else {
+            // do nothing
+        }
+        res.end();
+    });
+})
+
 
 module.exports = router;
