@@ -29,7 +29,7 @@ export const store = new Vuex.Store({
     actions: {
         retrieveToken(context, credentials) {
             return new Promise((resolve, reject) => {
-                axios.post('http://localhost:3000/login', {
+                axios.post('http://localhost:3000/api/login', {
                     email: credentials.email,
                     password: credentials.password,
                 }).then(response => {
@@ -54,7 +54,7 @@ export const store = new Vuex.Store({
 
             if (context.getters.isLoggedIn) {
                 return new Promise((resolve, reject) => {
-                    axios.post('http://localhost:3000/logout')
+                    axios.post('http://localhost:3000/api/logout')
                         .then(response => {
                             localStorage.removeItem('access_token')
                             context.commit('destroyToken')
@@ -74,7 +74,7 @@ export const store = new Vuex.Store({
         },
         register(context, credentials){
             return new Promise((resolve, reject) => {
-                axios.post('http://localhost:3000/register', {
+                axios.post('http://localhost:3000/api/register', {
                     email: credentials.email,
                     password: credentials.password,
                     username: credentials.username,

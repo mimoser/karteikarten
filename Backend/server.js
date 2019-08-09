@@ -1,4 +1,10 @@
 /* eslint-disable linebreak-style */
+
+// environment variables from .env file
+// console.log(require('dotenv').config());
+require('dotenv').config();
+
+
 const express = require('express');
 // const expressValidator = require('express-validator');
 const cookieSession = require('cookie-session');
@@ -6,12 +12,8 @@ const passport = require('passport');
 const routes = require('./routes');
 const passportSetup = require('./passport-setup');
 const mongoose = require('mongoose');
-const keys = require('./config/keys');
 const bodyParser = require('body-parser');
 
-// environment variables from .env file
-// console.log(require('dotenv').config());
-require('dotenv').config();
 
 const app = express();
 // app.use(expressValidator());
@@ -27,7 +29,7 @@ app.use(bodyParser.json());
 // set up session cookies
 app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000,
-  keys: [keys.session.cookieKey],
+  keys: [process.env.SESSION_COOKIE_KEY],
 }));
 
 // initialize passport
@@ -36,8 +38,8 @@ app.use(passport.session());
 
 // connect to mongodb
 // mongoose.Promise = global.Promise; // angeblich seit Version 5 nicht mehr nötig
-mongoose.connect(keys.mongodb.dbURI, {
-  useNewUrlParser: true,
+mongoose.connect(process.env.MONGODB_URI, { 
+  useNewUrlParser: true, 
   keepAlive: true,
   reconnectTries: 10,
 }, () => {
@@ -45,7 +47,7 @@ mongoose.connect(keys.mongodb.dbURI, {
 });
 
 // set up routes
-app.use(routes);
+app.use('/api',routes);
 
 // error handlers
 // Catch unauthorised errors

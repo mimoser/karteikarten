@@ -7,7 +7,8 @@ const deckSchema = mongoose.Schema({
     isPublic: {type: Boolean, default: false},
     averageRating: {type: Number, default: 2.5},
     // numberSubscribers: {type: Number, default: 0}, // determines how many users subscribed to this deck
-    subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] 
+    subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    tags:[String]   // wird für die Suche benutzt
 });
 
 const Deck = mongoose.model('Deck', deckSchema);

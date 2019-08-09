@@ -4,8 +4,10 @@
     <b-form-row class="justify-content-center">
       <b-col md="auto">
         <b-form v-on:submit="login">
-          <b-form-group :invalid-feedback="veeErrors.first('email')"
-            :state="!veeErrors.has('email')">
+          <b-form-group
+            :invalid-feedback="veeErrors.first('email')"
+            :state="!veeErrors.has('email')"
+          >
             <b-form-input
               v-validate="{required: true, email: true}"
               type="text"
@@ -15,8 +17,10 @@
               :state="!veeErrors.has('email')"
             />
           </b-form-group>
-          <b-form-group :invalid-feedback="veeErrors.first('password')"
-            :state="!veeErrors.has('password')">
+          <b-form-group
+            :invalid-feedback="veeErrors.first('password')"
+            :state="!veeErrors.has('password')"
+          >
             <b-form-input
               v-validate="{required: true}"
               type="password"

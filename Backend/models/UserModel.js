@@ -2,7 +2,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const keys = require('../config/keys');
 
 const userSchema = mongoose.Schema({
     email: {
@@ -33,7 +32,7 @@ userSchema.methods.generateJwt = function () {
         email: this.email,
         name: this.name,
         exp: parseInt(expiry.getTime() / 1000),
-    }, keys.jwtsecret);
+    }, process.env.JWT_SECRET); 
 };
 
 userSchema.virtual('password').set(function (value) {

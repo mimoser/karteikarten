@@ -6,7 +6,6 @@ const Deck = require('./models/DeckModel').Deck;
 const Card = require('./models/CardModel').Card;
 const cors = require('cors');
 const jwt = require('express-jwt');
-const keys = require('./config/keys');
 const { check, validationResult } = require('express-validator');
 
 const passwordGenerator = require('generate-password');
@@ -16,7 +15,7 @@ const mailer = require('./mailHelpers');
 
 
 const auth = jwt({
-    secret: keys.jwtsecret,
+    secret: process.env.JWT_SECRET,
     userProperty: 'payload',
 });
 
@@ -117,6 +116,9 @@ router.post('/logout', (req, res) => {
     return res.status(200).send('logout success');
 });
 
+/*
+/ Handles a posting of a deck. This deck contains an array of cards.
+*/  
 router.post('/deck', auth, (req, res) => {
     console.log(req.body);
 

@@ -36,7 +36,7 @@ export default {
     user() {
       return this.$store.state.accessToken;
     }
-  }
+  },
 };
 </script>
 
