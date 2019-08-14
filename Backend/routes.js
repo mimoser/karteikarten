@@ -47,7 +47,7 @@ router.post('/register', [check('email').isEmail(), check('password').isLength({
     }).then(function (user) {
         if (user) {
             res.status(500).json({
-                error: `Account with this ${(user.email === email)? "email":"username"} already exists.`
+                error: `Account with this ${(user.email === email) ? "email" : "username"} already exists.`
             });
         } else {
             // create user
@@ -96,9 +96,17 @@ router.post('/login', function (req, res) {
         // user found
         if (user) {
             token = user.generateJwt();
+
+            let u = {
+                'name': user.name,
+                'email': user.email,
+                'decks': user.decks,
+                'id': user.id
+            };
+
             res.status(200);
             res.json({
-                'userId': user.id,
+                'user': u,
                 'access_token': token,
             });
         } else {
@@ -118,7 +126,7 @@ router.post('/logout', (req, res) => {
 
 /*
 / Handles a posting of a deck. This deck contains an array of cards.
-*/  
+*/
 router.post('/deck', auth, (req, res) => {
     console.log(req.body);
 
@@ -296,5 +304,38 @@ router.post('/resetPassword', [check('email').isEmail()], (req, res) => {
     });
 })
 
+// updates profile
+
+router.post('/updateProfile', auth, (req, res) => {
+
+    // console.log(req.payload);
+
+    User.findOne({
+        email: req.payload.email
+    }).then(user => {
+        //update users data
+        if(req.body.profileData.email){
+            user.email = req.body.profileData.email;
+        }
+        if(req.body.profileData.username){
+            user.name = req.body.profileData.username;
+        }
+        if(req.body.profileData.password){
+            if(!user.validPassword(req.body.profileData.oldPassword)){
+                return res.status(500).json({"error":"Old password not valid!"});
+                // return res.send("Old password not valid!");
+            }
+            user.password = req.body.profileData.password;
+        }
+        user.save().then(updatedUser => {
+            let u = {
+                'name': updatedUser.name,
+                'email': updatedUser.email
+            };
+            res.status(200).json(u);
+        })
+
+    })
+})
 
 module.exports = router;

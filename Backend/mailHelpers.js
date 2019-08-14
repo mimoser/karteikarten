@@ -34,7 +34,7 @@ module.exports = {
             from: process.env.USER,
             to: data.email,
             subject: 'Karteikarten-App registration',
-            html: `<h2>Dear ${data.username} thanks registering!</h2></br><p>We wish you a good learning experience with our app!</p>`
+            html: `<h2>Dear ${data.username} thanks for registering!</h2></br><p>We wish you a good learning experience with our app!</p>`
         };
 
         smtpTransport.sendMail(mailOptions, function (err, info) {
