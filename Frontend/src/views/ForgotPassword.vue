@@ -30,7 +30,7 @@ export default {
     resetPassword(e) {
       e.preventDefault();
       axios
-        .post("http://localhost:3000/resetPassword", { email: this.email })
+        .post("http://localhost:3000/api/resetPassword", { email: this.email })
         .then(response => {
           this.$bvToast.toast('New password will be sent to the email you specified. Please make sure you change it after successefully logging in!', {
             title: "Password reset",

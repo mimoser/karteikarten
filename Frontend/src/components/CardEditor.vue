@@ -2,7 +2,16 @@
   <b-container fluid>
     <b-row>
       <b-col>
-        <vue-editor v-model="content" useCustomHandler @imageAdded="handleImageAdded"></vue-editor>
+
+        <b-button v-b-modal.cardeditor-modal-center>Create new card</b-button>
+
+        <b-modal id="cardeditor-modal-center" centered size="xl" title="Create new card" @ok="onSave" ok-title="Save">
+          <h4>Question</h4>
+          <vue-editor id="question-editor" v-model="questionHtml" useCustomImageHandler @imageAdded="handleImageAdded"></vue-editor>
+          <h4>Answer</h4>
+          <vue-editor id="answer-editor" v-model="answerHtml" useCustomImageHandler @imageAdded="handleImageAdded"></vue-editor>
+
+        </b-modal>
       </b-col>
     </b-row>
   </b-container>
@@ -12,21 +21,34 @@
 import { VueEditor } from "vue2-editor";
 
 export default {
+  name: "Cardeditor",
   components: {
     VueEditor
   },
 
   data() {
     return {
-      content: "<h1>Some initial content</h1>"
+      questionHtml: "<h1>Input a question here...</h1>",
+      answerHtml: "<h1>Input the answer to the above question...</h1>"
     };
   },
 
   methods: {
     handleImageAdded: function (file, Editor, cursorLocation, resetUploader){
-      debugger;
-      console.log(file);
-    }
+      // may be the image needs to be resized before getting added
+      // or some file extensions may be not allowed
+      let fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onloadend = function(evt){
+        Editor.insertEmbed(cursorLocation, "image", evt.target.result);
+        resetUploader();
+      }
+    },
+    onSave(){
+          console.log("saved!");
+          // handle 
+          
+      }
   }
 };
 </script>

@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const cardSchema = mongoose.Schema({
-    content: String,
+    question: String,
+    answer: String,
     difficulty: {type: Number, default: 0}
 });
 const Card = mongoose.model('Card', cardSchema);

@@ -81,6 +81,7 @@ export default {
                 appendToast: true
               }
             );
+            this.$store.commit('destroyToken');
           });
       });
     },
