@@ -2,16 +2,10 @@
   <b-container fluid>
     <b-row>
       <b-col>
-
-        <b-button v-b-modal.cardeditor-modal-center>Create new card</b-button>
-
-        <b-modal id="cardeditor-modal-center" centered size="xl" title="Create new card" @ok="onSave" ok-title="Save">
           <h4>Question</h4>
           <vue-editor id="question-editor" v-model="questionHtml" useCustomImageHandler @imageAdded="handleImageAdded"></vue-editor>
           <h4>Answer</h4>
           <vue-editor id="answer-editor" v-model="answerHtml" useCustomImageHandler @imageAdded="handleImageAdded"></vue-editor>
-
-        </b-modal>
       </b-col>
     </b-row>
   </b-container>
