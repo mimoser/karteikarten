@@ -1,5 +1,5 @@
-<template>
-  <div>
+<template >
+  <div class="margin_bottom">
     <b-navbar toggleable="lg" type="dark" variant="dark">
       <b-navbar-brand>Karteikarten</b-navbar-brand>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -36,9 +36,12 @@ export default {
     user() {
       return this.$store.state.accessToken;
     }
-  },
+  }
 };
 </script>
 
 <style>
+.margin_bottom {
+  margin-bottom: 1em;
+}
 </style>
