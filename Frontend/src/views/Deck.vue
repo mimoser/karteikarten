@@ -1,50 +1,52 @@
 <template>
   <div>
-    <router-link to="/mydecks">Back</router-link>
-    {{$route.params.id}}
-    <b-card bg-variant="light">
-      <b-form-group
-        label-cols-lg="3"
-        label="Deck data"
-        label-size="lg"
-        label-class="font-weight-bold pt-0"
-        class="mb-0"
-      >
+    <b-container fluid>
+      <b-row>
+        <router-link to="/mydecks">Back</router-link>
+      </b-row>
+      <b-card bg-variant="light">
         <b-form-group
-          label-cols-sm="3"
-          label="Title:"
-          label-align-sm="right"
-          label-for="nested-title"
-        >
-          <b-form-input id="nested-title" v-model="deck.title"></b-form-input>
-        </b-form-group>
-
-        <b-form-group
-          label-cols-sm="3"
-          label="Public:"
-          label-align-sm="right"
-          label-for="nested-public"
+          label-cols-lg="3"
+          label="Deck data"
+          label-size="lg"
+          label-class="font-weight-bold pt-0"
           class="mb-0"
         >
-          <b-form-checkbox id="nested-public" v-model="deck.isPublic" switch></b-form-checkbox>
-        </b-form-group>
+          <b-form-group
+            label-cols-sm="3"
+            label="Title:"
+            label-align-sm="right"
+            label-for="nested-title"
+          >
+            <b-form-input id="nested-title" v-model="deck.title"></b-form-input>
+          </b-form-group>
 
-        <b-form-group
-          label-cols-sm="3"
-          label="Tags:"
-          label-align-sm="right"
-          label-for="nested-tags"
-          class="mb-0"
-        >
-          <vue-tags-input
-            v-model="tag"
-            :tags="deck.tags"
-            @tags-changed="newTags => deck.tags = newTags"
-          />
-        </b-form-group>
-      </b-form-group>
-    </b-card>
+          <b-form-group
+            label-cols-sm="3"
+            label="Public:"
+            label-align-sm="right"
+            label-for="nested-public"
+            class="mb-0"
+          >
+            <b-form-checkbox id="nested-public" v-model="deck.isPublic" switch></b-form-checkbox>
+          </b-form-group>
 
+          <b-form-group
+            label-cols-sm="3"
+            label="Tags:"
+            label-align-sm="right"
+            label-for="nested-tags"
+            class="mb-0"
+          >
+            <vue-tags-input
+              v-model="tag"
+              :tags="deck.tags"
+              @tags-changed="newTags => deck.tags = newTags"
+            />
+          </b-form-group>
+        </b-form-group>
+      </b-card>
+    </b-container>
     <!-- cards list -->
     <b-container fluid>
       <!-- <b-row>
@@ -66,14 +68,16 @@
             :items="cardsTableProps.items"
             :fields="cardsTableProps.fields"
             :per-page="cardsTableProps.perPage"
-            :filter="cardsTableProps.filter"
             :current-page="cardsTableProps.currentPage"
             small
             responsive
             striped
-            @filtered="onFiltered"
           >
-            <span slot="html" slot-scope="data" v-html="data.value"></span>
+            <!-- <template v-slot:cell(index)="data">{{ data.index + 1 }}</template> -->
+
+            <span slot="question" slot-scope="data" v-html="wrapInIframe(data.value)"></span>
+
+            <span slot="answer" slot-scope="data" v-html="wrapInIframe(data.value)"></span>
           </b-table>
         </b-col>
       </b-row>
@@ -88,11 +92,16 @@
           ></b-pagination>
         </b-col>
       </b-row>
+      <b-row>
+        <b-col>
+          <b-button @click="onSaveDeck">Save Deck</b-button>
+        </b-col>
+        <b-col>
+          <b-button v-b-modal.cardeditor-modal-center right>Add new card</b-button>
+        </b-col>
+      </b-row>
     </b-container>
     <!-- cards list end -->
-
-    <b-button @click="onSaveDeck">Save Deck</b-button>
-    <b-button v-b-modal.cardeditor-modal-center>Add new card</b-button>
 
     <b-modal
       id="cardeditor-modal-center"
@@ -100,7 +109,7 @@
       size="xl"
       title="New Card"
       @ok="onAddCard"
-      ok-title="Add"
+      ok-title="OK"
     >
       <b-container fluid>
         <b-row>
@@ -108,6 +117,7 @@
             <h4>Question</h4>
             <vue-editor
               id="question-editor"
+              :editorOptions="editorSettings"
               v-model="questionHtml"
               useCustomImageHandler
               @imageAdded="handleImageAdded"
@@ -115,6 +125,7 @@
             <h4>Answer</h4>
             <vue-editor
               id="answer-editor"
+              :editorOptions="editorSettings"
               v-model="answerHtml"
               useCustomImageHandler
               @imageAdded="handleImageAdded"
@@ -128,8 +139,16 @@
 
 <script>
 import Cardeditor from "../components/CardEditor";
-import { VueEditor } from "vue2-editor";
 import VueTagsInput from "@johmun/vue-tags-input";
+
+import Quill from 'quill';
+
+import { VueEditor } from "vue2-editor";
+import { ImageDrop } from "quill-image-drop-module";
+import ImageResize  from "quill-image-resize-module";
+
+Quill.register("modules/imageDrop", ImageDrop);
+Quill.register("modules/imageResize", ImageResize);
 
 export default {
   name: "deck",
@@ -140,6 +159,12 @@ export default {
   },
   data() {
     return {
+      editorSettings: {
+        modules: {
+          imageDrop: true,
+          imageResize: {}
+        }
+      },
       deck: {
         title: null,
         tags: [],
@@ -152,8 +177,11 @@ export default {
         perPage: 10,
         currentPage: 1,
         items: [],
-        fields: ["question", "answer", "difficulty"],
-        filter: null
+        fields: [
+          { key: "question", label: "Question" },
+          { key: "answer", label: "Answer" },
+          { key: "difficulty", label: "Difficulty" }
+        ]
       },
       tag: "",
       questionHtml: "",
@@ -200,10 +228,9 @@ export default {
         resetUploader();
       };
     },
-    onFiltered: function() {
-      this.currentPage = 1;
-    },
     onAddCard() {
+      // let qHtml = `<iframe>${this.questionHtml}</iframe>`;
+      // let aHtml = `<iframe>${this.answerHtml}</iframe>`;
       this.deck.cards.push({
         question: this.questionHtml,
         answer: this.answerHtml,
@@ -211,6 +238,9 @@ export default {
       });
       this.questionHtml = "";
       this.answerHtml = "";
+    },
+    onTableRowClicked() {
+      console.log("sakldfjaslk");
     },
     onSaveDeck() {
       this.$store
@@ -233,6 +263,9 @@ export default {
             appendToast: true
           });
         });
+    },
+    wrapInIframe(html) {
+      return `<iframe srcdoc='${html}'></iframe>`;
     }
   }
 };
