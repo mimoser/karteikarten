@@ -27,6 +27,16 @@ const router = new Router({
       component: () => import(/* webpackChunkName: "mydecks" */ './views/MyDecks.vue')
     },
     {
+      path: '/deckEditor',
+      name: 'deckEditor',
+      component: () => import(/* webpackChunkName: "deckEditor" */ './views/DeckEditor.vue')
+    },
+    {
+      path: '/mydecks/deck/:id?',
+      name: 'deck',
+      component: () => import(/* webpackChunkName: "deck" */ './views/Deck.vue')
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import(/* webpackChunkName: "login" */ './views/Login.vue')

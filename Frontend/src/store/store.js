@@ -8,7 +8,9 @@ const store = new Vuex.Store({
     namespaced: true,
     state: {
         user: JSON.parse(localStorage.getItem('user')) || null,
-        accessToken: localStorage.getItem('access_token') || null
+        accessToken: localStorage.getItem('access_token') || null,
+        publicDecks: null,
+        userDecks: null
     },
     getters: {
         isLoggedIn(state) {
@@ -16,6 +18,12 @@ const store = new Vuex.Store({
         },
         user(state) {
             return state.user;
+        },
+        publicDecks(state) {
+            return state.publicDecks;
+        },
+        userDecks(state) {
+            return state.userDecks;
         }
     },
     mutations: {
@@ -30,7 +38,13 @@ const store = new Vuex.Store({
             state.user = user;
             localStorage.setItem('user', JSON.stringify(state.user));
         },
-        updateUserProfileData(state, userProfileData){
+        setUserDecks(state, decks){
+            state.userDecks = decks;
+        },
+        setPulicDecks(state, publicDecks) {
+            state.publicDecks = publicDecks;
+        },
+        updateUserProfileData(state, userProfileData) {
             state.user.name = userProfileData.name;
             state.user.email = userProfileData.email;
             localStorage.setItem('user', JSON.stringify(state.user));
@@ -105,10 +119,42 @@ const store = new Vuex.Store({
                 })
             })
         },
-        updateProfile(context, profileData) {
-            return new Promise((resolve, reject) => { 
+        fetchUserDecks(context){
+            return new Promise((resolve, reject)=> {
                 axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
-                axios.post('http://localhost:3000/api/updateProfile', {
+                axios.get('http://localhost:3000/api/userDecks').then(response => {
+                    context.commit('setUserDecks', response.data);
+                    resolve(response);
+                }).catch(error => {
+                    reject(error);
+                });
+            })
+        },
+        fetchPublicDecks(context) {
+            return new Promise((resolve, reject)=> {
+                axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
+                axios.get('http://localhost:3000/api/publicDecks').then(response => {
+                    context.commit('setPublicDecks', response.data);
+                    resolve(response);
+                }).catch(error => {
+                    reject(error);
+                });
+            })
+        },
+        fetchDeck(context, deckId){
+            return new Promise((resolve, reject) => {
+                axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
+                axios.get(`http://localhost:3000/api/deck/?deckId=${deckId}`).then(response => {
+                    resolve(response);
+                }).catch(error => {
+                    reject(error);
+                });
+            })
+        },
+        updateProfile(context, profileData) {
+            return new Promise((resolve, reject) => {
+                axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
+                axios.put('http://localhost:3000/api/updateProfile', {
                     profileData: profileData
                 }).then(response => {
                     console.log(response);
@@ -118,6 +164,34 @@ const store = new Vuex.Store({
                     // console.log(error);
                     reject(error);
                 });
+            })
+        },
+        saveDeck(context, deck){
+            return new Promise((resolve, reject) => {
+                axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
+                if(deck._id){
+                    // update
+                    axios.put('http://localhost:3000/api/deck', {
+                        deck: deck
+                    }).then(response => {
+                        console.log(response);
+                        resolve(response);
+                    }).catch(error => {
+                        // console.log(error);
+                        reject(error);
+                    });
+                } else {
+                    // add new one
+                    axios.post('http://localhost:3000/api/deck', {
+                        deck: deck
+                    }).then(response => {
+                        console.log(response);
+                        resolve(response);
+                    }).catch(error => {
+                        // console.log(error);
+                        reject(error);
+                    });
+                }
             })
         }
     }

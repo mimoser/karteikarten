@@ -5,11 +5,6 @@ const { check } = require('express-validator');
 const cors = require('cors');
 const jwt = require('express-jwt');
 
-
-const passwordGenerator = require('generate-password');
-
-const mailer = require('./mailHelpers');
-
 const userManagementCtrl = require('./controller/UserManagementController');
 const deckCtrl = require('./controller/DeckController');
 const profileCtrl = require('./controller/ProfileController');
@@ -29,27 +24,27 @@ router.use(cors(corsOptions));
 // user management ressources
 
 // register endpoint
-router.route('/register', [check('email').isEmail(), check('password').isLength({ min: 8 })]).post(userManagementCtrl.register);
+router.post('/register', [check('email').isEmail(), check('password').isLength({ min: 8 })], userManagementCtrl.register);
 // Route for carrying out the login process.
-router.route('/login').post(userManagementCtrl.login);
+router.post('/login', userManagementCtrl.login);
 // Route for carrying out the logout process.
-router.route('/logout').post(userManagementCtrl.logout);
-router.route('/resetPassword', [check('email').isEmail()]).post(userManagementCtrl.resetPassword);
+router.post('/logout', userManagementCtrl.logout);
+router.post('/resetPassword', [check('email').isEmail()], userManagementCtrl.resetPassword);
 
 
 // deck ressources
 
-router.route('/publicDecks', auth).get(deckCtrl.getPublicDecks);
-router.route('/deck', auth).get(deckCtrl.getDeck);
-router.route('/deck', auth).post(deckCtrl.addDeck);
-router.route('/deck', auth).put(deckCtrl.updateDeck);
-router.route('/deck', auth).delete(deckCtrl.removeDeck);
+router.get('/publicDecks', auth, deckCtrl.getPublicDecks);
+router.get('/deck', auth, deckCtrl.getDeck);
+router.post('/deck', auth, deckCtrl.addDeck);
+router.put('/deck', auth, deckCtrl.updateDeck);
+router.get('/userDecks', auth, deckCtrl.getUserDecks);
+router.delete('/deck', auth, deckCtrl.removeDeck);
 
 
 // Profile
 // updates profile
-router.route('/updateProfile', auth).put(profileCtrl.updateProfile);
-
+router.put('/updateProfile', auth, profileCtrl.updateProfile);
 
 
 module.exports = router;

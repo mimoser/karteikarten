@@ -1,5 +1,10 @@
 const passport = require('passport');
+const mailer = require('./../mailHelpers');
+const User = require('./../models/UserModel').User;
+const passwordGenerator = require('generate-password');
+
 const { check, validationResult } = require('express-validator');
+
 module.exports = {
     register: function (req, res) {
         const errors = validationResult(req);

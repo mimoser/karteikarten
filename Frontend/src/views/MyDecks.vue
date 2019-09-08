@@ -1,15 +1,12 @@
 <template>
   <div>
-    <h1>My Decks view</h1>
-
-
-
-        <b-button v-b-modal.deckeditor-modal-center>Add new deck</b-button>
-
-        <b-modal id="deckeditor-modal-center" centered size="xl" title="New deck" @ok="onSave" ok-title="Save">
-            <DeckEditor></DeckEditor>
-        </b-modal>
-
+    
+      <h2>Your Decks</h2>
+      <p v-for='deck in decks.decks' v-bind:key="deck.id" @click="onClick(deck.id)" style="border: solid; background-color: green">
+        {{deck.title}}
+      </p>
+      <router-link to="/mydecks/deck">Add Deck</router-link>
+      
   </div>
 </template>
 
@@ -20,15 +17,39 @@ export default {
   components: {
     DeckEditor
   },
-  data(){
+  data() {
     return {
-      
-    }
+      decks: []
+    };
+  },
+  created() {
+    this.fetchDecks();
   },
   methods: {
-      onSave() {
+    onSave() {
 
-      }
+    },
+    onClick(deckId) {
+      console.log(deckId);
+      this.$router.push({ name: "deck", params: {id: deckId } });
+    },
+    fetchDecks() {
+      let that = this;
+      this.$store.dispatch('fetchUserDecks').then(response => {
+        this.decks = that.$store.getters.userDecks;
+      }).catch(error => {
+        this.$bvToast.toast(
+              `Couldn't fetch user decks`,
+              {
+                title: "Problem fetching user decks",
+                variant: "warning",
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+                appendToast: true
+              }
+            );
+      });
+    }
   }
 };
 </script>

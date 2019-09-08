@@ -1,5 +1,7 @@
 const Deck = require('../models/DeckModel').Deck;
 const Card = require('../models/CardModel').Card;
+const User = require('../models/UserModel').User;
+
 module.exports = {
     // returns public decks
     // the returned deck, contains no cards, since it's only for the dashboard view
@@ -11,8 +13,8 @@ module.exports = {
                 publicDecks.forEach(deck => {
                     let d = {
                         id: deck.id,
-                        name: deck.name,
-                        owner: deck.owner.email,
+                        title: deck.title,
+                        owner: deck.owner.name,
                         averageRating: deck.averageRating,
                         numberOfCards: deck.cards.length,
                         numberOfSubscribers: deck.subscribers.length
@@ -30,7 +32,7 @@ module.exports = {
     },
     // returns a certain deck, but only if owner or subscriber
     getDeck: function (req, res) {
-        let deckId = req.body.id;
+        let deckId = req.query.deckId;
 
         Deck.findOne({ _id: deckId }).populate({
             path: 'owner',
@@ -46,7 +48,8 @@ module.exports = {
                     isPublic: deck.isPublic,
                     averageRating: deck.averageRating,
                     _id: deck._id,
-                    name: deck.name
+                    title: deck.title,
+                    tags: deck.tags
                 });
             } else {
                 res.sendStatus(404);
@@ -56,34 +59,54 @@ module.exports = {
             res.status(500).send(error);
         });
     },
+
+    getUserDecks: function (req, res) {
+        // find decks where user owner or subscriber
+
+        Deck.find({ $or: [{ owner: req.payload._id }, { subscribers: { $eq: req.payload._id } }] }).populate('owner', 'email').populate('cards').exec().then(decks => {
+            if (decks) {
+                console.log(decks);
+                let aDecks = new Array();
+                decks.forEach(deck => {
+                    let d = {
+                        id: deck.id,
+                        title: deck.title,
+                        owner: deck.owner.email,
+                        averageRating: deck.averageRating,
+                    }
+                    aDecks.push(d);
+                })
+                res.status(200).json({ "decks": aDecks });
+            } else {
+                res.sendStatus(404);
+            }
+        }, error => {
+            console.log(error);
+            res.status(500).send(error);
+        });
+    },
+
     addDeck: function (req, res) {
         console.log(req.body);
 
         User.findOne(
             { email: req.payload.email }
         ).then(user => {
-            // owner is the user sending this request
-            let owner = user;
-
-            let isPublic = req.body.isPublic || false;
-            let rating = 0;
-
-            let subscribers = new Array();
 
             let cards = new Array();
-            req.body.cards.forEach(card => {
-                let c = new Card({ content: card.content, difficulty: card.difficulty });
+            req.body.deck.cards.forEach(card => {
+                let c = new Card({ question: card.question, answer: card.answer, difficulty: card.difficulty });
                 c.save();
                 cards.push(c);
             });
 
             let deck = new Deck({
-                owner: owner,
-                name: req.body.name,
+                owner: user,
+                title: req.body.deck.title,
                 cards: cards,
-                isPublic: isPublic,
-                averageRating: rating,
-                subscribers: subscribers
+                isPublic: req.body.deck.isPublic,
+                averageRating: req.body.deck.averageRating,
+                subscribers: new Array()
             });
 
             deck.save().then(deck => {
@@ -105,37 +128,32 @@ module.exports = {
         });
     },
     // updates a certain deck, but only if owner
-    updateDeck: function (req, res) {
-        let deckId = req.body.deckId;
+    updateDeck: async function (req, res) {
+        let deckId = req.body.deck._id;
 
-        Deck.findOne({ _id: deckId }).populate({
-            path: 'owner',
-            match: { email: req.payload.email }
-        }).then(deck => {
+        Deck.findOne({ _id: deckId }).then(deck => {
             if (deck) {
                 console.log(deck);
-                let updatedCards = new Array();
-                req.body.cards.forEach(card => {
-                    let c = new Card(card);
-                    c.save();
-                    updatedCards.push(new Card(c));
-                });
-                deck.cards.forEach(card => {
-                    Card.findOne({ _id: card._id }).exec().then(c => {
-                        c.remove();
-                    });
+
+                deck.title = req.body.deck.title;
+                deck.tags = req.body.deck.tags;
+                deck.averageRating = req.body.deck.averageRating;
+                deck.isPublic = req.body.deck.isPublic;
+
+                req.body.deck.cards.forEach( async card => {
+                    if (card._id) {
+                        await Card.findOneAndUpdate({ _id: card._id }, card, { new: true });
+                    } else {
+                        let c = new Card({ question: card.question, answer: card.answer, difficulty: card.difficulty });
+                        c.save();
+                        deck.cards.push(c);
+                    }
                 });
 
-                deck.cards = updatedCards;
                 deck.save().then(savedDeck => {
-                    res.status(200).json({
-                        cards: savedDeck.cards,
-                        isPublic: savedDeck.isPublic,
-                        averageRating: savedDeck.averageRating,
-                        _id: savedDeck._id,
-                        name: savedDeck.name
-                    });
+                    res.status(200).send();
                 })
+
             } else {
                 res.sendStatus(404);
             }
