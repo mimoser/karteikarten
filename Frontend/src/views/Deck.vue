@@ -1,5 +1,10 @@
 <template>
-  <div>
+  <div v-if="loading">
+    <div class="text-center">
+      <b-spinner variant="primary" label="Text Centered"></b-spinner>
+    </div>
+  </div>
+  <div v-else>
     <b-container fluid>
       <b-row>
         <router-link to="/mydecks">Back</router-link>
@@ -97,6 +102,9 @@
           <b-button @click="onSaveDeck">Save Deck</b-button>
         </b-col>
         <b-col>
+          <b-button @click="onDeleteDeck">Delete Deck</b-button>
+        </b-col>
+        <b-col>
           <b-button v-b-modal.cardeditor-modal-center right>Add new card</b-button>
         </b-col>
       </b-row>
@@ -141,11 +149,11 @@
 import Cardeditor from "../components/CardEditor";
 import VueTagsInput from "@johmun/vue-tags-input";
 
-import Quill from 'quill';
+import Quill from "quill";
 
 import { VueEditor } from "vue2-editor";
 import { ImageDrop } from "quill-image-drop-module";
-import ImageResize  from "quill-image-resize-module";
+import ImageResize from "quill-image-resize-module";
 
 Quill.register("modules/imageDrop", ImageDrop);
 Quill.register("modules/imageResize", ImageResize);
@@ -159,6 +167,7 @@ export default {
   },
   data() {
     return {
+      loading: true,
       editorSettings: {
         modules: {
           imageDrop: true,
@@ -196,6 +205,8 @@ export default {
   created() {
     if (this.$route.params.id) {
       this.fetchDeck();
+    } else {
+      this.loading = false;
     }
     this.cardsTableProps.items = this.deck.cards;
   },
@@ -207,6 +218,7 @@ export default {
         .then(response => {
           that.deck = response.data;
           that.cardsTableProps.items = that.deck.cards;
+          that.loading = false;
         })
         .catch(error => {
           this.$bvToast.toast(`Couldn't fetch deck`, {
@@ -246,6 +258,10 @@ export default {
       this.$store
         .dispatch("saveDeck", this.deck)
         .then(response => {
+          if (response.data._id) {
+            this.deck._id = response.data._id;
+            this.$router.push({ name: "deck", params: { id: this.deck._id } });
+          }
           this.$bvToast.toast(`Deck saved`, {
             title: "Deck saved",
             variant: "info",
@@ -253,6 +269,10 @@ export default {
             autoHideDelay: 3000,
             appendToast: true
           });
+          // let that = this;
+          //   setTimeout(function() {
+          //     that.$router.push({ name: "deck", params: { id: that.deck._id } });
+          //   }, 3000);
         })
         .catch(error => {
           this.$bvToast.toast(`Couldn't save deck`, {
@@ -263,6 +283,9 @@ export default {
             appendToast: true
           });
         });
+    },
+    onDeleteDeck() {
+      alert("Muss noch implementiert werden!");
     },
     wrapInIframe(html) {
       return `<iframe srcdoc='${html}'></iframe>`;

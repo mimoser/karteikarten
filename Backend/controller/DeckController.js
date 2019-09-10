@@ -112,7 +112,7 @@ module.exports = {
             deck.save().then(deck => {
                 user.decks.push(deck);
                 user.save().then(user => {
-                    res.status(200).send("Deck added!");
+                    res.status(200).json({_id:deck.id});
                 }, error => {
                     console.log(error);
                     res.status(500).send(error);

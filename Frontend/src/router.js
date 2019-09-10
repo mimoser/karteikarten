@@ -67,6 +67,8 @@ router.beforeEach((to, from, next) => {
   if (to.fullPath === '/') {
     if (!store.state.accessToken) {
       next('/login');
+    } else {
+      next('/dashboard');
     }
   }
   if (to.fullPath === '/dashboard') {
