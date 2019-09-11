@@ -128,7 +128,7 @@ module.exports = {
         });
     },
     // updates a certain deck, but only if owner
-    updateDeck: async function (req, res) {
+    updateDeck: function (req, res) {
         let deckId = req.body.deck._id;
 
         Deck.findOne({ _id: deckId }).then(deck => {
@@ -161,5 +161,15 @@ module.exports = {
             console.log(error);
         });
     },
-    removeDeck: function (req, res) { }
+    deleteDeck: function (req, res) { 
+        let deckId = req.query.id;
+
+        Deck.findOneAndDelete({_id: deckId}).then(deck => {
+            if(deck) {
+                res.status(200).send();
+            } else {
+                res.status(401).send();
+            }
+        })
+    }
 }

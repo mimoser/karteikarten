@@ -39,7 +39,7 @@ router.get('/deck', auth, deckCtrl.getDeck);
 router.post('/deck', auth, deckCtrl.addDeck);
 router.put('/deck', auth, deckCtrl.updateDeck);
 router.get('/userDecks', auth, deckCtrl.getUserDecks);
-router.delete('/deck', auth, deckCtrl.removeDeck);
+router.delete('/deck', auth, deckCtrl.deleteDeck);
 
 
 // Profile

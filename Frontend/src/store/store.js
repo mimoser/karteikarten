@@ -193,6 +193,16 @@ const store = new Vuex.Store({
                     });
                 }
             })
+        },
+        deleteDeck(context, deckId){
+            return new Promise((resolve, reject) => {
+                axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
+                axios.delete(`http://localhost:3000/api/deck/?id=${deckId}`).then(response => {
+                    resolve(response);
+                }).catch(error => {
+                    reject(error);
+                });
+            });
         }
     }
 });

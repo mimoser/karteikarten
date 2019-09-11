@@ -285,7 +285,15 @@ export default {
         });
     },
     onDeleteDeck() {
-      alert("Muss noch implementiert werden!");
+      this.$store
+        .dispatch("deleteDeck", this.deck._id)
+        .then(response => {
+          console.log(response);
+          this.$router.push({ name: "mydecks"});
+        })
+        .catch(error => {
+          console.log(response);
+        });
     },
     wrapInIframe(html) {
       return `<iframe srcdoc='${html}'></iframe>`;
