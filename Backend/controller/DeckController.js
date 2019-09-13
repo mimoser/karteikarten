@@ -100,13 +100,17 @@ module.exports = {
                 cards.push(c);
             });
 
+            let subscribers = new Array();
+            subscribers.push(user);
+
+
             let deck = new Deck({
                 owner: user,
                 title: req.body.deck.title,
                 cards: cards,
                 isPublic: req.body.deck.isPublic,
                 averageRating: req.body.deck.averageRating,
-                subscribers: new Array()
+                subscribers: subscribers
             });
 
             deck.save().then(deck => {
@@ -164,8 +168,31 @@ module.exports = {
     deleteDeck: function (req, res) { 
         let deckId = req.query.id;
 
+        // TODO: only delete if owner !!!
+
+
         Deck.findOneAndDelete({_id: deckId}).then(deck => {
             if(deck) {
+                Card.find({_id: {$in: deck.cards}}).then(cards=> {
+                    cards.forEach(card => {
+                        card.remove();
+                    });
+                }).catch(error => {
+                    console.log(error);
+                })
+                User.find({_id: {$in: deck.subscribers}}).then(users => {
+                    users.forEach(user => {
+                        for(var i = 0; i < user.decks.length; i++){
+                            if(user.decks[i]._id.equals(deck._id)){
+                                user.decks.splice(i,1)
+                                i--;
+                            }
+                        }
+                        user.save();
+                    });
+                }).catch(error => {
+                    console.log(error);
+                })
                 res.status(200).send();
             } else {
                 res.status(401).send();

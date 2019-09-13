@@ -4,13 +4,21 @@
     <div v-if="!decks" class="text-center">
       <b-spinner variant="primary" label="Text Centered"></b-spinner>
     </div>
-    <div
+    <!-- <div
       v-else
       v-for="deck in decks.decks"
       v-bind:key="deck.id"
       @click="onClick(deck.id)"
       class="deck bg-light"
-    >{{deck.title}}</div>
+    >{{deck.title}}</div> -->
+    <div v-else>
+      <b-card-group deck>
+        <b-card v-for="deck in decks.decks" v-bind:key="deck.id" bg-variant="light" text-variant="black" class="text-center" @click="onClick(deck.id)">
+          <b-card-text>{{deck.title}}</b-card-text>
+        </b-card>
+      </b-card-group>
+    </div>
+
     <router-link to="/mydecks/deck">Add Deck</router-link>
   </div>
 </template>
@@ -30,7 +38,7 @@ export default {
   created() {
     if (!this.decks) {
       this.fetchDecks();
-    } 
+    }
   },
   methods: {
     onSave() {},
