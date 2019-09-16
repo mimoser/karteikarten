@@ -24,8 +24,7 @@
       </b-row>
     </b-container>
   </div> -->
-  <div>
-    <b-container fluid>
+    <b-container>
       <b-row>
         <b-col>
           <b-form-group>
@@ -68,7 +67,6 @@
         </b-col>
       </b-row>
     </b-container>
-  </div>
 </template>
 
 <script>

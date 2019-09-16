@@ -1,5 +1,5 @@
 <template>
-  <b-container fluid>
+  <b-container>
     <h2>{{$store.getters.user.name}}</h2>
     <b-form-row class="justify-content-center">
       <b-col md="md">

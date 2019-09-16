@@ -1,148 +1,225 @@
 <template>
-  <div v-if="loading">
-    <div class="text-center">
-      <b-spinner variant="primary" label="Text Centered"></b-spinner>
+  <b-container>
+    <div v-if="loading">
+      <div class="text-center">
+        <b-spinner variant="primary" label="Text Centered"></b-spinner>
+      </div>
     </div>
-  </div>
-  <div v-else>
-    <b-container fluid>
+
+    <div v-else>
       <b-row>
-        <router-link to="/mydecks">Back</router-link>
-      </b-row>
-      <b-card bg-variant="light">
-        <b-form-group
-          label-cols-lg="3"
-          label="Deck data"
-          label-size="lg"
-          label-class="font-weight-bold pt-0"
-          class="mb-0"
-        >
-          <b-form-group
-            label-cols-sm="3"
-            label="Title:"
-            label-align-sm="right"
-            label-for="nested-title"
-          >
-            <b-form-input id="nested-title" v-model="deck.title"></b-form-input>
-          </b-form-group>
+        <b-col cols="12">
+          <b-card bg-variant="light">
+            <b-row>
+              <b-col cols="4">
+                <b-form-group
+                  v-bind="deck"
+                  :label="deck.title"
+                  label-size="lg"
+                  label-class="font-weight-bold pt-0"
+                  class="mb-0"
+                ></b-form-group>
+              </b-col>
+              <b-col cols="8">
+                <b-form-group
+                  label-cols-sm="3"
+                  label="Title:"
+                  label-align-sm="right"
+                  label-for="nested-title"
+                >
+                  <b-form-input id="nested-title" v-model="deck.title"></b-form-input>
+                </b-form-group>
 
-          <b-form-group
-            label-cols-sm="3"
-            label="Public:"
-            label-align-sm="right"
-            label-for="nested-public"
-            class="mb-0"
-          >
-            <b-form-checkbox id="nested-public" v-model="deck.isPublic" switch></b-form-checkbox>
-          </b-form-group>
+                <b-form-group
+                  label-cols-sm="3"
+                  label="Public:"
+                  label-align-sm="right"
+                  label-for="nested-public"
+                  class="mb-0"
+                >
+                  <b-form-checkbox id="nested-public" v-model="deck.isPublic" switch></b-form-checkbox>
+                </b-form-group>
 
-          <b-form-group
-            label-cols-sm="3"
-            label="Tags:"
-            label-align-sm="right"
-            label-for="nested-tags"
-            class="mb-0"
-          >
-            <vue-tags-input
-              v-model="tag"
-              :tags="deck.tags"
-              @tags-changed="newTags => deck.tags = newTags"
-            />
-          </b-form-group>
-        </b-form-group>
-      </b-card>
-    </b-container>
-    <!-- cards list -->
-    <b-container fluid>
-      <!-- <b-row>
-        <b-col>
-          <b-form-group>
-            <b-input-group>
-              <b-form-input v-model="cardsTableProps.filter" placeholder="Type to Search"></b-form-input>
-              <b-input-group-append>
-                <b-button :disabled="!cardsTableProps.filter" @click="cardsTableProps.filter = ''">Clear</b-button>
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-        </b-col>
-      </b-row>-->
-      <b-row>
-        <b-col>
-          <b-table
-            id="cards-table"
-            :items="cardsTableProps.items"
-            :fields="cardsTableProps.fields"
-            :per-page="cardsTableProps.perPage"
-            :current-page="cardsTableProps.currentPage"
-            small
-            responsive
-            striped
-          >
-            <!-- <template v-slot:cell(index)="data">{{ data.index + 1 }}</template> -->
-
-            <span slot="question" slot-scope="data" v-html="wrapInIframe(data.value)"></span>
-
-            <span slot="answer" slot-scope="data" v-html="wrapInIframe(data.value)"></span>
-          </b-table>
+                <b-form-group
+                  label-cols-sm="3"
+                  label="Tags:"
+                  label-align-sm="right"
+                  label-for="nested-tags"
+                  class="mb-0"
+                >
+                  <vue-tags-input
+                    v-model="tag"
+                    :tags="deck.tags"
+                    @tags-changed="newTags => deck.tags = newTags"
+                  />
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row align-h="start">
+              <b-button size="sm" pill variant="outline-secondary" @click="onSaveDeck">Save Deck</b-button>
+              <b-button size="sm" pill variant="outline-secondary" @click="onDeleteDeck">Delete Deck</b-button>
+              <b-button
+                size="sm"
+                pill
+                variant="outline-secondary"
+                v-b-modal.cardeditor-modal-center
+              >Add new card</b-button>
+            </b-row>
+          </b-card>
         </b-col>
       </b-row>
-      <b-row>
-        <b-col>
-          <b-pagination
-            v-model="cardsTableProps.currentPage"
-            :total-rows="rows"
-            :per-page="cardsTableProps.perPage"
-            aria-controls="cards-table"
-            align="center"
-          ></b-pagination>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <b-button @click="onSaveDeck">Save Deck</b-button>
-        </b-col>
-        <b-col>
-          <b-button @click="onDeleteDeck">Delete Deck</b-button>
-        </b-col>
-        <b-col>
-          <b-button v-b-modal.cardeditor-modal-center right>Add new card</b-button>
-        </b-col>
-      </b-row>
-    </b-container>
-    <!-- cards list end -->
-
-    <b-modal
-      id="cardeditor-modal-center"
-      centered
-      size="xl"
-      title="New Card"
-      @ok="onAddCard"
-      ok-title="OK"
-    >
-      <b-container fluid>
-        <b-row>
+      <b-container>
+        <!-- <b-row>
           <b-col>
-            <h4>Question</h4>
-            <vue-editor
-              id="question-editor"
-              :editorOptions="editorSettings"
-              v-model="questionHtml"
-              useCustomImageHandler
-              @imageAdded="handleImageAdded"
-            ></vue-editor>
-            <h4>Answer</h4>
-            <vue-editor
-              id="answer-editor"
-              :editorOptions="editorSettings"
-              v-model="answerHtml"
-              useCustomImageHandler
-              @imageAdded="handleImageAdded"
-            ></vue-editor>
+            <b-table
+              id="cards-table"
+              :items="cardsTableProps.items"
+              :fields="cardsTableProps.fields"
+              :per-page="cardsTableProps.perPage"
+              :current-page="cardsTableProps.currentPage"
+              small
+              responsive
+              striped
+            >
+              <span slot="question" slot-scope="data" v-html="wrapInIframe(data.value)"></span>
+
+              <span slot="answer" slot-scope="data" v-html="wrapInIframe(data.value)"></span>
+            </b-table>
           </b-col>
         </b-row>
+        <b-row>
+          <b-col>
+            <b-pagination
+              v-model="cardsTableProps.currentPage"
+              :total-rows="rows"
+              :per-page="cardsTableProps.perPage"
+              aria-controls="cards-table"
+              align="center"
+            ></b-pagination>
+          </b-col>
+        </b-row>
+        <b-row align-h="between">
+          <b-button @click="onSaveDeck">Save Deck</b-button>
+          <b-button @click="onDeleteDeck">Delete Deck</b-button>
+          <b-button v-b-modal.cardeditor-modal-center right>Add new card</b-button>
+        </b-row>-->
+        <b-row align-h="between">
+          <b-card-group>
+            <b-card
+              v-for="card in deck.cards"
+              v-bind="card"
+              v-bind:key="card.id"
+              bg-variant="light"
+              text-variant="black"
+              class="text-center"
+              header-tag="header"
+              footer-tag="footer"
+            >
+              <template v-slot:header>
+                <div>Hier stehen Statistiken zur Karte</div>
+              </template>
+
+              <b-card-text>
+                <div v-html="card.question"></div>
+                <!-- <iframe style="-webkit-transform:scale(0.5);-moz-transform-scale(0.5);" :srcdoc="card.question"></iframe> -->
+              </b-card-text>
+
+              <template v-slot:footer>
+                <b-container>
+                  <b-row align-h="between">
+                    <b-button
+                      size="sm"
+                      pill
+                      variant="outline-secondary"
+                      @click="onEditCard(card)"
+                      v-b-modal.update-cardeditor-modal-center
+                    >Edit</b-button>
+                    <b-button
+                      size="sm"
+                      pill
+                      variant="outline-secondary"
+                      @click="onDeleteCard(card)"
+                    >Delete</b-button>
+                  </b-row>
+                </b-container>
+              </template>
+            </b-card>
+          </b-card-group>
+        </b-row>
       </b-container>
-    </b-modal>
-  </div>
+      <!-- cards list end -->
+
+      <b-modal
+        id="cardeditor-modal-center"
+        centered
+        size="xl"
+        title="New Card"
+        @ok="onAddCard"
+        ok-title="OK"
+      >
+        <b-container fluid>
+          <b-row>
+            <b-col>
+              <h4>Question</h4>
+              <vue-editor
+                id="question-editor"
+                :editorOptions="editorSettings"
+                v-model="questionHtml"
+                useCustomImageHandler
+                @imageAdded="handleImageAdded"
+                :editorToolbar="editorSettings.toolbar"
+              ></vue-editor>
+              <h4>Answer</h4>
+              <vue-editor
+                id="answer-editor"
+                :editorOptions="editorSettings"
+                v-model="answerHtml"
+                useCustomImageHandler
+                @imageAdded="handleImageAdded"
+                :editorToolbar="editorSettings.toolbar"
+              ></vue-editor>
+            </b-col>
+          </b-row>
+        </b-container>
+      </b-modal>
+
+      <b-modal
+        id="update-cardeditor-modal-center"
+        centered
+        size="xl"
+        title="Update card"
+        @ok="onUpdateCard()"
+        @close="clearCurrentlySelectedCard()"
+        @cancel="clearCurrentlySelectedCard()"
+        ok-title="OK"
+      >
+        <b-container fluid>
+          <b-row>
+            <b-col>
+              <h4>Question</h4>
+              <vue-editor
+                id="question-editor"
+                :editorOptions="editorSettings"
+                :editorToolbar="editorSettings.toolbar"
+                v-model="questionHtml"
+                useCustomImageHandler
+                @imageAdded="handleImageAdded"
+              ></vue-editor>
+              <h4>Answer</h4>
+              <vue-editor
+                id="answer-editor"
+                :editorOptions="editorSettings"
+                :editorToolbar="editorSettings.toolbar"
+                v-model="answerHtml"
+                useCustomImageHandler
+                @imageAdded="handleImageAdded"
+              ></vue-editor>
+            </b-col>
+          </b-row>
+        </b-container>
+      </b-modal>
+    </div>
+  </b-container>
 </template>
 
 <script>
@@ -172,7 +249,14 @@ export default {
         modules: {
           imageDrop: true,
           imageResize: {}
-        }
+        },
+        toolbar: [
+          [{ header: [false, 1, 2, 3, 4, 5, 6] }],
+          ["bold", "italic", "underline"],
+          [{ list: "ordered" }, { list: "bullet" }],
+          [{ color: [] }, { background: [] }],
+          ["image", "code-block"]
+        ]
       },
       deck: {
         title: null,
@@ -194,7 +278,8 @@ export default {
       },
       tag: "",
       questionHtml: "",
-      answerHtml: ""
+      answerHtml: "",
+      currentlySelectedCard: null
     };
   },
   computed: {
@@ -233,12 +318,39 @@ export default {
     handleImageAdded(file, Editor, cursorLocation, resetUploader) {
       // may be the image needs to be resized before getting added
       // or some file extensions may be not allowed
-      let fileReader = new FileReader();
-      fileReader.readAsDataURL(file);
-      fileReader.onloadend = function(evt) {
-        Editor.insertEmbed(cursorLocation, "image", evt.target.result);
+
+      var canvas = document.createElement("canvas");
+
+      var ctx = canvas.getContext("2d");
+
+      var image = new Image();
+      image.onload = function() {
+        var maxWidth = 250;
+        var maxHeight = 250;
+        var ratio = Math.min(maxHeight / this.width, maxHeight / this.height);
+        var width = this.width * ratio;
+        var height = this.height * ratio;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.drawImage(image, 0, 0, width, height);
+        Editor.insertEmbed(
+          cursorLocation,
+          "image",
+          canvas.toDataURL("image/jpeg",1.0)
+        );
+        URL.revokeObjectURL(image.src);
         resetUploader();
       };
+      image.src = URL.createObjectURL(file);
+
+      // let fileReader = new FileReader();
+      // fileReader.readAsDataURL(file);
+      // fileReader.onloadend = function(evt) {
+      //   Editor.insertEmbed(cursorLocation, "image", evt.target.result);
+      //   resetUploader();
+      // };
     },
     onAddCard() {
       // let qHtml = `<iframe>${this.questionHtml}</iframe>`;
@@ -288,8 +400,7 @@ export default {
       this.$store
         .dispatch("deleteDeck", this.deck._id)
         .then(response => {
-          console.log(response);
-          this.$router.push({ name: "mydecks"});
+          this.$router.push({ name: "mydecks" });
         })
         .catch(error => {
           console.log(response);
@@ -297,10 +408,53 @@ export default {
     },
     wrapInIframe(html) {
       return `<iframe srcdoc='${html}'></iframe>`;
+    },
+    onEditCard(card) {
+      this.currentlySelectedCard = card;
+      this.questionHtml = card.question;
+      this.answerHtml = card.answer;
+    },
+    onUpdateCard() {
+      let i = this.deck.cards.indexOf(this.currentlySelectedCard);
+      this.deck.cards[i].question = this.questionHtml;
+      this.deck.cards[i].answer = this.answerHtml;
+      this.questionHtml = "";
+      this.answerHtml = "";
+      this.currentlySelectedCard = null;
+    },
+    onDeleteCard(card) {
+      for (var i = 0; i < this.deck.cards.length; i++) {
+        if (this.deck.cards[i] === card) {
+          this.deck.cards.splice(i, 1);
+        }
+      }
+    },
+    clearCurrentlySelectedCard() {
+      this.currentlySelectedCard = null;
+    },
+    imageToDataUri(img, width, height) {
+      // create an off-screen canvas
+      var canvas = document.createElement("canvas"),
+        ctx = canvas.getContext("2d");
+
+      // set its dimension to target size
+      canvas.width = width;
+      canvas.height = height;
+
+      // draw source image into the off-screen canvas:
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // encode image to data-uri with base64 version of compressed image
+      return canvas.toDataURL();
     }
   }
 };
 </script>
 
 <style>
+iframe {
+  display: block;
+  width: 100%;
+  border: none;
+}
 </style>

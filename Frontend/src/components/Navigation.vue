@@ -1,4 +1,6 @@
 <template >
+  <b-container>
+
   <div class="margin_bottom">
     <b-navbar toggleable="lg" type="light" variant="light">
       <b-navbar-brand>Karteikarten</b-navbar-brand>
@@ -27,6 +29,7 @@
       </b-collapse>
     </b-navbar>
   </div>
+  </b-container>
 </template>
 
 <script>
