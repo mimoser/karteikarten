@@ -104,7 +104,7 @@
           <b-button v-b-modal.cardeditor-modal-center right>Add new card</b-button>
         </b-row>-->
         <b-row align-h="between">
-          <b-card-group>
+          <b-card-group columns>
             <b-card
               v-for="card in deck.cards"
               v-bind="card"
@@ -114,12 +114,13 @@
               class="text-center"
               header-tag="header"
               footer-tag="footer"
+              style="max-width: 20rem;"
             >
               <template v-slot:header>
                 <div>Hier stehen Statistiken zur Karte</div>
               </template>
 
-              <b-card-text>
+              <b-card-text style="min-height: 10rem; max-height: 10rem; overflow: hidden;">
                 <div v-html="card.question"></div>
                 <!-- <iframe style="-webkit-transform:scale(0.5);-moz-transform-scale(0.5);" :srcdoc="card.question"></iframe> -->
               </b-card-text>
@@ -431,6 +432,8 @@ export default {
     },
     clearCurrentlySelectedCard() {
       this.currentlySelectedCard = null;
+      this.answerHtml = "";
+      this.questionHtml = "";
     },
     imageToDataUri(img, width, height) {
       // create an off-screen canvas
@@ -450,11 +453,8 @@ export default {
   }
 };
 </script>
-
 <style>
-iframe {
-  display: block;
-  width: 100%;
-  border: none;
+h4 {
+ text-align: center; 
 }
 </style>
