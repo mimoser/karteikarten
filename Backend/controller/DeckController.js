@@ -63,18 +63,24 @@ module.exports = {
     getUserDecks: function (req, res) {
         // find decks where user owner or subscriber
 
-        Deck.find({ $or: [{ owner: req.payload._id }, { subscribers: { $eq: req.payload._id } }] }).populate('owner', 'email').populate('cards').exec().then(decks => {
+        Deck.find({ $or: [{ owner: req.payload._id }, { subscribers: { $eq: req.payload._id } }] }).populate('owner', 'email').populate('cards').exec().then(async decks => {
             if (decks) {
                 let aDecks = new Array();
-                decks.forEach(deck => {
+                
+
+                for(var i = 0; i < decks.length; i++){
+                    var difficulty = await decks[i].getDifficulty();
                     let d = {
-                        id: deck.id,
-                        title: deck.title,
-                        owner: deck.owner.email,
-                        averageRating: deck.averageRating,
+                        id: decks[i].id,
+                        title: decks[i].title,
+                        owner: decks[i].owner.email,
+                        averageRating: decks[i].averageRating,
+                        difficulty:difficulty
                     }
                     aDecks.push(d);
-                })
+
+                }
+
                 res.status(200).json({ "decks": aDecks });
             } else {
                 res.sendStatus(404);
