@@ -6,6 +6,7 @@ module.exports = {
     // returns public decks
     // the returned deck, contains no cards, since it's only for the dashboard view
     getPublicDecks: function (req, res) {
+        // get user to filter public decks 
         Deck.find({ isPublic: true }).populate('owner', 'email').populate('cards').exec().then(publicDecks => {
             if (publicDecks) {
                 console.log(publicDecks);
@@ -66,16 +67,16 @@ module.exports = {
         Deck.find({ $or: [{ owner: req.payload._id }, { subscribers: { $eq: req.payload._id } }] }).populate('owner', 'email').populate('cards').exec().then(async decks => {
             if (decks) {
                 let aDecks = new Array();
-                
 
-                for(var i = 0; i < decks.length; i++){
+
+                for (var i = 0; i < decks.length; i++) {
                     var difficulty = await decks[i].getDifficulty();
                     let d = {
                         id: decks[i].id,
                         title: decks[i].title,
                         owner: decks[i].owner.email,
                         averageRating: decks[i].averageRating,
-                        difficulty:difficulty
+                        difficulty: difficulty
                     }
                     aDecks.push(d);
 
@@ -154,31 +155,31 @@ module.exports = {
                 var newCards = new Array();
                 // var cardsToDelete = new Array();
 
-                for(var i = 0; i < deck.cards.length; i++){
+                for (var i = 0; i < deck.cards.length; i++) {
                     cardsInDB.push(deck.cards[i]._id.toString())
                 }
 
-                
-                for(var i = 0; i < req.body.deck.cards.length; i++){
-                    if(req.body.deck.cards[i]._id == null){
+
+                for (var i = 0; i < req.body.deck.cards.length; i++) {
+                    if (req.body.deck.cards[i]._id == null) {
                         newCards.push(req.body.deck.cards[i]);
                     } else {
                         cardsToUpdate.push(req.body.deck.cards[i]._id);
                     }
                 }
-                cardsInDB.forEach( async cardId => {
-                    if(!cardsToUpdate.includes(cardId)){
+                cardsInDB.forEach(async cardId => {
+                    if (!cardsToUpdate.includes(cardId)) {
                         // cardsToDelete.push(cardId);
-                        await Card.findOneAndDelete({_id: cardId});
+                        await Card.findOneAndDelete({ _id: cardId });
                     }
                 });
 
-                cardsToUpdate.forEach( async cardId => {
+                cardsToUpdate.forEach(async cardId => {
                     var card = req.body.deck.cards.find(card => card._id === cardId);
-                    await Card.findOneAndUpdate({ _id: cardId}, card, {new: true});
+                    await Card.findOneAndUpdate({ _id: cardId }, card, { new: true });
                 });
 
-                newCards.forEach( async card => {
+                newCards.forEach(async card => {
                     let c = new Card({ question: card.question, answer: card.answer, difficulty: card.difficulty });
                     c.save();
                     deck.cards.push(c);
@@ -249,7 +250,7 @@ module.exports = {
     },
 
     subscribeDeck: function (req, res) {
-        
+
     },
 
     unsubscribeDeck: function (req, res) {

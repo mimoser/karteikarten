@@ -1,100 +1,90 @@
 <template>
-  <!-- <div>
-    <b-container fluid>
-      <b-row>
-        <b-col>
-          <label>
-            Frage
-            <Editor></Editor>
-          </label>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <label>
-            Antwort
-            <Editor></Editor>
-          </label>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <b-button variant="dark" @click="save()">Save</b-button>
-        </b-col>
-      </b-row>
-    </b-container>
-  </div> -->
-    <b-container>
-      <b-row>
-        <b-col>
-          <b-form-group>
-            <b-input-group>
-              <b-form-input v-model="filter" placeholder="Type to Search"></b-form-input>
-              <b-input-group-append>
-                <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <b-table
-            id="my-table"
-            :items="items"
-            :fields="fields"
-            :per-page="perPage"
-            :filter="filter"
-            :current-page="currentPage"
-            small
-            responsive
-            striped
-            thead-class="hidden_header"
-            @filtered="onFiltered"
-          >
-          <span slot="html" slot-scope="data" v-html="data.value"></span></b-table>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <b-pagination
-            v-model="currentPage"
-            :total-rows="rows"
-            :per-page="perPage"
-            aria-controls="my-table"
-            align="center"
-          ></b-pagination>
-        </b-col>
-      </b-row>
-    </b-container>
+  <div class="container">
+    <div>
+      <b-form-group>
+        <b-input-group>
+          <b-form-input v-model="filter" placeholder="Search by tags"></b-form-input>
+          <b-input-group-append>
+            <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
+          </b-input-group-append>
+        </b-input-group>
+      </b-form-group>
+    </div>
+    <div>
+      <select name="filter" class="margin-bottom">
+        <option value="Neueste">Neueste zuerst</option>
+        <option value="beliebt">Am beliebtesten</option>
+      </select>
+    </div>
+    <div>
+      <table class="table" id="my-table">
+        <tbody>
+          <template v-for="deck in decks">
+            <tr
+              class="row"
+              v-bind:key="deck.id"
+              :filter="filter"
+              :per-page="perPage"
+              :current-page="currentPage"
+            >
+              <td class="full_length border">
+                <h4 class="align_center">{{deck.title}}</h4>
+                <p>
+                  Von {{deck.owner}}
+                  <br />
+                  {{deck.numberOfCards}} Karten
+                </p>
+                <div class="same-row">
+                  <span>
+                    <starRating
+                      float="right"
+                      :star-size="20"
+                      :read-only="true"
+                      :increment="0.01"
+                      :rating="deck.averageRating"
+                    ></starRating>
+                  </span>
+                  <span>{{deck.numberOfSubscribers}} Abonnenten</span>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <b-pagination
+        v-model="currentPage"
+        :total-rows="rows"
+        :per-page="perPage"
+        aria-controls="my-table"
+        align="right"
+      ></b-pagination>
+    </div>
+  </div>
 </template>
 
 <script>
 import Editor from "../components/CardEditor";
-const fake = require('../fakedata/fakedata').fake;
+import StarRating from "vue-star-rating";
+const fake = require("../fakedata/fakedata").fake;
 
 export default {
   components: {
-    Editor
+    Editor,
+    StarRating
   },
   data() {
     return {
-      perPage: 3,
+      perPage: 10,
       currentPage: 1,
-      items: fake.fakeData(),
-      fields: [
-        { key: "id", label: "", thClass: "d-none", tdClass: "d-none" },
-        { key: "html", label: "" },
-        // { key: "owner", label: "" },
-        // { key: "numberOfCards", label: "" },
-        // { key: "averageRating", label: "" }
-      ],
+      decks: fake._decks,
       filter: null
     };
   },
   computed: {
     rows() {
-      return this.items.length;
+      return this.decks.length;
     }
   },
   methods: {
@@ -107,6 +97,12 @@ export default {
     },
     onFiltered: function() {
       this.currentPage = 1;
+    },
+    showCurrentRating: function(rating) {
+      this.currentRating =
+        rating === 0
+          ? this.currentSelectedRating
+          : "Click to select " + rating + " stars";
     }
   }
 };
@@ -115,6 +111,22 @@ export default {
 <style>
 .hidden_header {
   display: none;
+}
+.align_center {
+  align-content: center;
+}
+.full_length {
+  width: 100%;
+}
+.border {
+  border-width: 5px;
+}
+.margin-bottom {
+  margin-bottom: 1em;
+}
+.same-row {
+  display: flex;
+  justify-content: space-between;
 }
 </style>
 
