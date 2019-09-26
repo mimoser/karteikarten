@@ -3,7 +3,11 @@
     <div>
       <b-form-group>
         <b-input-group>
-          <b-form-input v-model="search" placeholder="Search by tags"></b-form-input>
+          <b-form-input
+            v-model="search"
+            placeholder="Search by tags"
+            v-on:change="getPublicDecks()"
+          ></b-form-input>
           <b-input-group-append>
             <b-button :disabled="!search" @click="search = ''">Clear</b-button>
           </b-input-group-append>
@@ -80,11 +84,6 @@ export default {
       search: null,
       loading: false
     };
-  },
-  created() {
-    if (this.decks == null) {
-      this.getPublicDecks();
-    }
   },
   mounted() {
     this.getPublicDecks();

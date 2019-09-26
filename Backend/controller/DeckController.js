@@ -10,14 +10,26 @@ module.exports = {
         const pagesize = parseInt(req.query.pageSize) || 10;
         const page = parseInt(req.query.page) || 1
         const offset = (page - 1) * pagesize;
-        const search = req.query.search;
         const user = req.query.user;
         let maxDecks = 0;
+
+        // conditions object
+        var conditions = {};
+        var and_clauses = []; // filter the search by any criteria given by the user
+        and_clauses.push({ 'isPublic': true });
+        if (req.query.search !== undefined && req.query.search !== 'null') {
+            console.log(req.query);
+            and_clauses.push({ tags: { $eq: req.query.search } });
+        }
+        if (and_clauses.length > 0) {
+            conditions['$and'] = and_clauses;
+        }
+        console.log('conditions filled', conditions);
         // TODO get user to filter public decks 
-        Deck.find({ isPublic: true, tags: search }).countDocuments().then(count => {
+        Deck.find(conditions).countDocuments().then(count => {
             if (count) {
                 maxDecks = count;
-                Deck.find({ isPublic: true, tags: search }).skip(offset).limit(pagesize).populate('owner', 'email').populate('cards').exec().then(publicDecks => {
+                Deck.find(conditions).skip(offset).limit(pagesize).populate('owner', 'email').populate('cards').exec().then(publicDecks => {
                     if (publicDecks) {
                         let decks = new Array();
                         publicDecks.forEach(deck => {
