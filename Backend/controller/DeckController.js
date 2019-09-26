@@ -6,30 +6,42 @@ module.exports = {
     // returns public decks
     // the returned deck, contains no cards, since it's only for the dashboard view
     getPublicDecks: function (req, res) {
-        // get user to filter public decks 
-        Deck.find({ isPublic: true }).populate('owner', 'email').populate('cards').exec().then(publicDecks => {
-            if (publicDecks) {
-                console.log(publicDecks);
-                let decks = new Array();
-                publicDecks.forEach(deck => {
-                    let d = {
-                        id: deck.id,
-                        title: deck.title,
-                        owner: deck.owner.name,
-                        averageRating: deck.averageRating,
-                        numberOfCards: deck.cards.length,
-                        numberOfSubscribers: deck.subscribers.length
+        // pagination        
+        const pagesize = parseInt(req.query.pageSize) || 10;
+        const page = parseInt(req.query.page) || 1
+        const offset = (page - 1) * pagesize;
+        const search = req.query.search;
+        const user = req.query.user;
+        let maxDecks = 0;
+        // TODO get user to filter public decks 
+        Deck.find({ isPublic: true, tags: search }).countDocuments().then(count => {
+            if (count) {
+                maxDecks = count;
+                Deck.find({ isPublic: true, tags: search }).skip(offset).limit(pagesize).populate('owner', 'email').populate('cards').exec().then(publicDecks => {
+                    if (publicDecks) {
+                        let decks = new Array();
+                        publicDecks.forEach(deck => {
+                            let d = {
+                                id: deck.id,
+                                title: deck.title,
+                                owner: deck.owner.name,
+                                averageRating: deck.averageRating,
+                                numberOfCards: deck.cards.length,
+                                numberOfSubscribers: deck.subscribers.length
+                            }
+                            decks.push(d);
+                        })
+                        res.status(200).json({ "decks": decks, maxDecks: maxDecks });
+                    } else {
+                        res.sendStatus(404);
                     }
-                    decks.push(d);
-                })
-                res.status(200).json({ "decks": decks });
-            } else {
-                res.sendStatus(404);
+                }, error => {
+                    console.log(error);
+                    res.status(500).send(error);
+                });
             }
-        }, error => {
-            console.log(error);
-            res.status(500).send(error);
         });
+
     },
     // returns a certain deck, but only if owner or subscriber
     getDeck: function (req, res) {

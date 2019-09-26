@@ -1,32 +1,26 @@
 <template>
-  <div class="container">
+  <div v-if="!loading" class="container">
     <div>
       <b-form-group>
         <b-input-group>
-          <b-form-input v-model="filter" placeholder="Search by tags"></b-form-input>
+          <b-form-input v-model="search" placeholder="Search by tags"></b-form-input>
           <b-input-group-append>
-            <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
+            <b-button :disabled="!search" @click="search = ''">Clear</b-button>
           </b-input-group-append>
         </b-input-group>
       </b-form-group>
     </div>
-    <div>
+    <!-- <div>
       <select name="filter" class="margin-bottom">
         <option value="Neueste">Neueste zuerst</option>
         <option value="beliebt">Am beliebtesten</option>
       </select>
-    </div>
+    </div>-->
     <div>
       <table class="table" id="my-table">
         <tbody>
           <template v-for="deck in decks">
-            <tr
-              class="row"
-              v-bind:key="deck.id"
-              :filter="filter"
-              :per-page="perPage"
-              :current-page="currentPage"
-            >
+            <tr class="row" v-bind:key="deck.id">
               <td class="full_length border">
                 <h4 class="align_center">{{deck.title}}</h4>
                 <p>
@@ -55,19 +49,22 @@
     <div>
       <b-pagination
         v-model="currentPage"
-        :total-rows="rows"
-        :per-page="perPage"
-        aria-controls="my-table"
+        :total-rows="maxDecks"
+        :per-page="pageSize"
+        @input="getPublicDecks()"
         align="right"
       ></b-pagination>
     </div>
+  </div>
+  <div v-else>
+    <b-spinner class="spinner" label="Spinning"></b-spinner>
   </div>
 </template>
 
 <script>
 import Editor from "../components/CardEditor";
 import StarRating from "vue-star-rating";
-const fake = require("../fakedata/fakedata").fake;
+import axios from "axios";
 
 export default {
   components: {
@@ -76,16 +73,21 @@ export default {
   },
   data() {
     return {
-      perPage: 10,
       currentPage: 1,
-      decks: fake._decks,
-      filter: null
+      maxDecks: 0,
+      pageSize: 1,
+      decks: null,
+      search: null,
+      loading: false
     };
   },
-  computed: {
-    rows() {
-      return this.decks.length;
+  created() {
+    if (this.decks == null) {
+      this.getPublicDecks();
     }
+  },
+  mounted() {
+    this.getPublicDecks();
   },
   methods: {
     save: function() {
@@ -95,14 +97,25 @@ export default {
         appendToast: true
       });
     },
-    onFiltered: function() {
-      this.currentPage = 1;
-    },
     showCurrentRating: function(rating) {
       this.currentRating =
         rating === 0
           ? this.currentSelectedRating
           : "Click to select " + rating + " stars";
+    },
+    getPublicDecks: function() {
+      this.loading = true;
+      const token = localStorage.getItem("access_token");
+      axios.defaults.headers.common["Authorization"] = "Bearer " + token;
+      axios
+        .get(
+          `http://localhost:3000/api/publicDecks?page=${this.currentPage}&pageSize=${this.pageSize}&search=${this.search}`
+        )
+        .then(response => {
+          this.decks = response.data.decks;
+          this.maxDecks = response.data.maxDecks;
+          this.loading = false;
+        });
     }
   }
 };

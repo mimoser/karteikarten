@@ -5,38 +5,43 @@
     </div>
     <div v-else>
       <b-row align-h="between">
-          <b-card-group columns>
-            <b-card
-              v-for="deck in decks.decks"
-              v-bind:key="deck.id"
-              bg-variant="light"
-              text-variant="black"
-              class="text-center"
-              :title="deck.title"
-              header-tag="header"
-              footer-tag="footer"
-            >
-              <template v-slot:header>
-                <div>Hier stehen Statistiken zum Deck</div>
-              </template>
-              <template v-slot:footer>
-                <b-container>
-                  <b-row align-h="between">
-                    <b-button
+        <b-card-group columns>
+          <b-card
+            v-for="deck in decks.decks"
+            v-bind:key="deck.id"
+            bg-variant="light"
+            text-variant="black"
+            class="text-center"
+            :title="deck.title"
+            header-tag="header"
+            footer-tag="footer"
+          >
+            <template v-slot:header>
+              <div>Hier stehen Statistiken zum Deck</div>
+            </template>
+            <template v-slot:footer>
+              <b-container>
+                <b-row align-h="between">
+                  <b-button
                     v-if="deck.owner._id == $store.getters.user._id"
-                      size="sm"
-                      pill
-                      variant="outline-secondary"
-                      @click="onClick(deck.id)"
-                    >Edit</b-button>
-                    <b-button v-if="deck.owner._id != $store.getters.user._id" size="sm" pill variant="outline-secondary">Unsubscribe</b-button>
-                     <!-- <b-button v-if="deck.owner._id == $store.getters.user._id" size="sm" pill variant="outline-secondary">Deactivate</b-button> -->
-                    <b-button size="sm" pill variant="outline-secondary">Learn</b-button>
-                  </b-row>
-                </b-container>
-              </template>
-            </b-card>
-          </b-card-group>
+                    size="sm"
+                    pill
+                    variant="outline-secondary"
+                    @click="onClick(deck.id)"
+                  >Edit</b-button>
+                  <b-button
+                    v-if="deck.owner._id != $store.getters.user._id"
+                    size="sm"
+                    pill
+                    variant="outline-secondary"
+                  >Unsubscribe</b-button>
+                  <!-- <b-button v-if="deck.owner._id == $store.getters.user._id" size="sm" pill variant="outline-secondary">Deactivate</b-button> -->
+                  <b-button size="sm" pill variant="outline-secondary">Learn</b-button>
+                </b-row>
+              </b-container>
+            </template>
+          </b-card>
+        </b-card-group>
       </b-row>
       <!-- <div
       v-else
