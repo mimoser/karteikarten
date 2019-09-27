@@ -79,7 +79,7 @@ export default {
     return {
       currentPage: 1,
       maxDecks: 0,
-      pageSize: 1,
+      pageSize: 5,
       decks: null,
       search: null,
       loading: false

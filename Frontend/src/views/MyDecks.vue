@@ -17,7 +17,17 @@
             footer-tag="footer"
           >
             <template v-slot:header>
-              <div>Hier stehen Statistiken zum Deck</div>
+              <div>
+                <span>
+                  <starRating
+                    float="right"
+                    :star-size="20"
+                    :read-only="true"
+                    :increment="0.01"
+                    :rating="deck.averageRating"
+                  ></starRating>
+                </span>
+              </div>
             </template>
             <template v-slot:footer>
               <b-container>
@@ -62,10 +72,12 @@
 
 <script>
 import DeckEditor from "../views/DeckEditor";
+import StarRating from "vue-star-rating";
 
 export default {
   components: {
-    DeckEditor
+    DeckEditor,
+    StarRating
   },
   data() {
     return {

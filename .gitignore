@@ -2,3 +2,4 @@ config/keys.js
 Backend/.idea/vcs.xml
 Frontend/package-lock.json
 Backend/.idea/workspace.xml
+Backend/Export/*
