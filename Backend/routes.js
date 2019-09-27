@@ -8,6 +8,8 @@ const jwt = require('express-jwt');
 const userManagementCtrl = require('./controller/UserManagementController');
 const deckCtrl = require('./controller/DeckController');
 const profileCtrl = require('./controller/ProfileController');
+const exportCtrl = require('./controller/ExportController');
+const importCtrl = require('./controller/ImportController');
 const auth = jwt({
     secret: process.env.JWT_SECRET,
     userProperty: 'payload',
@@ -35,16 +37,26 @@ router.post('/resetPassword', [check('email').isEmail()], userManagementCtrl.res
 // deck ressources
 
 router.get('/publicDecks', auth, deckCtrl.getPublicDecks);
-router.get('/deck', auth, deckCtrl.getDeck);
-router.post('/deck', auth, deckCtrl.addDeck);
-router.put('/deck', auth, deckCtrl.updateDeck);
+router.get('/decks/:deckId', auth, deckCtrl.getDeck);
+router.post('/decks', auth, deckCtrl.addDeck);
+router.put('/decks/:deckId', auth, deckCtrl.updateDeck);
 router.get('/userDecks', auth, deckCtrl.getUserDecks);
-router.delete('/deck', auth, deckCtrl.deleteDeck);
+router.delete('/decks/:deckId', auth, deckCtrl.deleteDeck);
 
+// // card
+// router.put('/decks/:deckId/cards', auth, deckCtrl.updateDeck);
+// router.get('/decks/:deckId/cards/:cardId', auth, deckCtrl.updateDeck);
 
 // Profile
 // updates profile
 router.put('/updateProfile', auth, profileCtrl.updateProfile);
+
+// Export
+router.get('/export', auth, exportCtrl.exportDeck);
+
+// Import
+router.get('/import', auth, importCtrl.importDeck);
+
 
 
 module.exports = router;

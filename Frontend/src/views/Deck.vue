@@ -5,7 +5,6 @@
         <b-spinner variant="primary" label="Text Centered"></b-spinner>
       </div>
     </div>
-
     <div v-else>
       <b-row>
         <b-col cols="12">
@@ -58,6 +57,7 @@
             <b-row align-h="start">
               <b-button size="sm" pill variant="outline-secondary" @click="onSaveDeck">Save Deck</b-button>
               <b-button size="sm" pill variant="outline-secondary" @click="onDeleteDeck">Delete Deck</b-button>
+              <b-button size="sm" pill variant="outline-secondary" @click="exportDeck">Export Deck</b-button>
               <b-button
                 size="sm"
                 pill
@@ -226,7 +226,7 @@
 <script>
 import Cardeditor from "../components/CardEditor";
 import VueTagsInput from "@johmun/vue-tags-input";
-
+import axios from "axios";
 import Quill from "quill";
 
 import { VueEditor } from "vue2-editor";
@@ -339,7 +339,7 @@ export default {
         Editor.insertEmbed(
           cursorLocation,
           "image",
-          canvas.toDataURL("image/jpeg",1.0)
+          canvas.toDataURL("image/jpeg", 1.0)
         );
         URL.revokeObjectURL(image.src);
         resetUploader();
@@ -449,12 +449,28 @@ export default {
 
       // encode image to data-uri with base64 version of compressed image
       return canvas.toDataURL();
+    },
+    exportDeck() {
+      const token = localStorage.getItem("access_token");
+      axios.defaults.headers.common["Authorization"] = "Bearer " + token;
+      axios({
+        url: `http://localhost:3000/api/export?deckId=${this.deck._id}`,
+        method: "GET",
+        responseType: "blob" // important
+      }).then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", this.deck.title + ".json"); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+      });
     }
   }
 };
 </script>
 <style>
 h4 {
- text-align: center; 
+  text-align: center;
 }
 </style>

@@ -38,7 +38,7 @@ const store = new Vuex.Store({
             state.user = user;
             localStorage.setItem('user', JSON.stringify(state.user));
         },
-        setUserDecks(state, decks){
+        setUserDecks(state, decks) {
             state.userDecks = decks;
         },
         setPulicDecks(state, publicDecks) {
@@ -119,8 +119,8 @@ const store = new Vuex.Store({
                 })
             })
         },
-        fetchUserDecks(context){
-            return new Promise((resolve, reject)=> {
+        fetchUserDecks(context) {
+            return new Promise((resolve, reject) => {
                 axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
                 axios.get('http://localhost:3000/api/userDecks').then(response => {
                     context.commit('setUserDecks', response.data);
@@ -130,21 +130,22 @@ const store = new Vuex.Store({
                 });
             })
         },
-        fetchPublicDecks(context) {
-            return new Promise((resolve, reject)=> {
+        fetchPublicDecks(context, pag) {
+            return new Promise((resolve, reject) => {
                 axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
-                axios.get('http://localhost:3000/api/publicDecks').then(response => {
-                    context.commit('setPublicDecks', response.data);
+                axios.get(`http://localhost:3000/api/publicDecks?page=${pag.page}&pageSize=${pag.pageSize}`).then(response => {
+                    console.log(response);
+                    context.commit('setPublicDecks', response.data.decks);
                     resolve(response);
                 }).catch(error => {
                     reject(error);
                 });
             })
         },
-        fetchDeck(context, deckId){
+        fetchDeck(context, deckId) {
             return new Promise((resolve, reject) => {
                 axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
-                axios.get(`http://localhost:3000/api/deck/?deckId=${deckId}`).then(response => {
+                axios.get(`http://localhost:3000/api/decks/${deckId}`).then(response => {
                     resolve(response);
                 }).catch(error => {
                     reject(error);
@@ -166,12 +167,12 @@ const store = new Vuex.Store({
                 });
             })
         },
-        saveDeck(context, deck){
+        saveDeck(context, deck) {
             return new Promise((resolve, reject) => {
                 axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
-                if(deck._id){
+                if (deck._id) {
                     // update
-                    axios.put('http://localhost:3000/api/deck', {
+                    axios.put(`http://localhost:3000/api/decks/${deck._id}`, {
                         deck: deck
                     }).then(response => {
                         console.log(response);
@@ -182,7 +183,7 @@ const store = new Vuex.Store({
                     });
                 } else {
                     // add new one
-                    axios.post('http://localhost:3000/api/deck', {
+                    axios.post(`http://localhost:3000/api/decks`, {
                         deck: deck
                     }).then(response => {
                         console.log(response);
@@ -194,10 +195,10 @@ const store = new Vuex.Store({
                 }
             })
         },
-        deleteDeck(context, deckId){
+        deleteDeck(context, deckId) {
             return new Promise((resolve, reject) => {
                 axios.defaults.headers.common['Authorization'] = 'Bearer ' + context.state.accessToken;
-                axios.delete(`http://localhost:3000/api/deck/?id=${deckId}`).then(response => {
+                axios.delete(`http://localhost:3000/api/decks/${deckId}`).then(response => {
                     resolve(response);
                 }).catch(error => {
                     reject(error);

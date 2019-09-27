@@ -57,7 +57,7 @@ module.exports = {
     },
     // returns a certain deck, but only if owner or subscriber
     getDeck: function (req, res) {
-        let deckId = req.query.deckId;
+        let deckId = req.params.deckId;
 
         Deck.findOne({ _id: deckId }).populate({
             path: 'owner',
@@ -163,7 +163,7 @@ module.exports = {
     },
     // updates a certain deck, but only if owner
     updateDeck: function (req, res) {
-        let deckId = req.body.deck._id;
+        let deckId = req.params.deckId;
 
         Deck.findOne({ _id: deckId }).then(deck => {
             if (deck) {
@@ -242,7 +242,7 @@ module.exports = {
         });
     },
     deleteDeck: function (req, res) {
-        let deckId = req.query.id;
+        let deckId = req.params.deckId;
 
         Deck.findOneAndDelete({ $and: [{ _id: deckId, owner: req.payload._id }] }).then(deck => {
             if (deck) {
