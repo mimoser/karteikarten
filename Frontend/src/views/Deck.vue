@@ -373,15 +373,23 @@ export default {
         .then(response => {
           if (response.data._id) {
             this.deck._id = response.data._id;
-            this.$router.push({ name: "deck", params: { id: this.deck._id } });
+            this.$store.dispatch("fetchUserDecks").then(response => {
+              this.$bvToast.toast(`Deck saved`, {
+                title: "Deck saved",
+                variant: "info",
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+                appendToast: true
+              });
+              let that = this;
+              setTimeout(function() {
+                that.$router.push({
+                  name: "deck",
+                  params: { id: that.deck._id }
+                });
+              }, 3000);
+            });
           }
-          this.$bvToast.toast(`Deck saved`, {
-            title: "Deck saved",
-            variant: "info",
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
-            appendToast: true
-          });
           // let that = this;
           //   setTimeout(function() {
           //     that.$router.push({ name: "deck", params: { id: that.deck._id } });
@@ -401,10 +409,29 @@ export default {
       this.$store
         .dispatch("deleteDeck", this.deck._id)
         .then(response => {
-          this.$router.push({ name: "mydecks" });
+          this.$store.dispatch("fetchUserDecks").then(response => {
+              this.$bvToast.toast(`Deck deleted. Redirecting.`, {
+                title: "Deck deleted.",
+                variant: "info",
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+                appendToast: true
+              });
+              let that = this;
+              setTimeout(function() {
+                that.$router.push({ name: "mydecks" });
+              }, 3000);
+            });
+
         })
         .catch(error => {
-          console.log(response);
+          this.$bvToast.toast(`Couldn't delete deck`, {
+            title: "Problem deleting deck",
+            variant: "warning",
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+            appendToast: true
+          });
         });
     },
     wrapInIframe(html) {

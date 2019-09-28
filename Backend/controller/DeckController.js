@@ -170,9 +170,14 @@ module.exports = {
                 console.log(deck);
 
                 deck.title = req.body.deck.title;
-                deck.tags = req.body.deck.tags;
                 deck.averageRating = req.body.deck.averageRating;
                 deck.isPublic = req.body.deck.isPublic;
+
+                var tags = Array.prototype.slice.call(req.body.deck.tags);
+                deck.tags = new Array();
+                tags.forEach(tag => {
+                    deck.tags.push(tag.text);
+                })
 
                 var cardsInDB = new Array();
                 var cardsToUpdate = new Array();
@@ -203,35 +208,16 @@ module.exports = {
                     await Card.findOneAndUpdate({ _id: cardId }, card, { new: true });
                 });
 
-                newCards.forEach(async card => {
-                    let c = new Card({ question: card.question, answer: card.answer, difficulty: card.difficulty });
+                for (var i = 0; i < newCards.length; i++) {
+                    let c = new Card({ question: newCards[i].question, answer: newCards[i].answer, difficulty: newCards[i].difficulty });
                     c.save();
                     deck.cards.push(c);
-                });
-
-                // if(req.body.deck.cards.length>0){
-                //     req.body.deck.cards.forEach(async card => {
-                //         if (card._id) {
-                //             await Card.findOneAndUpdate({ _id: card._id }, card, { new: true });
-                //         } else {
-                //             let c = new Card({ question: card.question, answer: card.answer, difficulty: card.difficulty });
-                //             c.save();
-                //             deck.cards.push(c);
-                //         }
-                //     });
-                // } else {
-                //     Card.find({ _id: { $in: deck.cards } }).then(cards => {
-                //         cards.forEach(card => {
-                //             card.remove();
-                //         });
-                //     }).catch(error => {
-                //         console.log(error);
-                //     })
-                //     // deck.cards = req.body.deck.cards;
-                // }
+                }
 
                 deck.save().then(savedDeck => {
-                    res.status(200).send();
+                    res.status(200).json(savedDeck);
+                }).catch(error => {
+                    res.status(500).send();
                 })
 
             } else {

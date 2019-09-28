@@ -1,7 +1,7 @@
 <template>
   <b-container>
     <div v-if="!decks" class="text-center">
-      <b-spinner variant="primary" label="Text Centered"></b-spinner>
+      <b-spinner variant="primary" label="Spinner"></b-spinner>
     </div>
     <div v-else>
       <b-row align-h="between">
@@ -81,13 +81,13 @@ export default {
   },
   data() {
     return {
-      decks: null
+      decks: this.$store.getters.userDecks
     };
   },
   created() {
     if (!this.decks) {
       this.fetchDecks();
-    }
+    } 
   },
   methods: {
     onSave() {},
