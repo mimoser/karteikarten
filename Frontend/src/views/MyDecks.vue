@@ -4,7 +4,7 @@
       <b-spinner variant="primary" label="Spinner"></b-spinner>
     </div>
     <div v-else>
-      <b-row align-h="between">
+      <b-row>
         <b-card-group columns>
           <b-card
             v-for="deck in decks.decks"
@@ -18,29 +18,47 @@
           >
             <template v-slot:header>
               <div>
-                <span>
-                  <starRating
+                <b-row align-h="between" align-v="center">
+                  <fa-rating :glyph="thumbsUp"
+                    :read-only="(deck.owner===$store.getters.user.id)?true:false"
+                    :increment="1"
+                    :item-size="15"
+                    :rating="deck.averageRating"
+                    @rating-selected="setRating($event, deck.id)"
+                  ></fa-rating>
+                  <!-- <starRating
                     float="right"
                     :star-size="20"
-                    :read-only="true"
-                    :increment="0.01"
+                    :read-only="(deck.owner!=$store.getters.user.id)?true:false"
+                    :increment="1"
                     :rating="deck.averageRating"
-                  ></starRating>
-                </span>
+                    @rating-selected="setRating($event, deck.id)"
+                  ></starRating> -->
+
+                  <fa-rating :glyph="fire"
+                  :read-only="true"
+                  :item-size="15"
+                  :max-rating="3"
+                  :active-color="fireColor"
+                  :rating="deck.difficulty"></fa-rating>
+                <!-- <b-col>
+                  {{difficulty(deck.difficulty)}}
+                </b-col> -->
+                </b-row>
               </div>
             </template>
             <template v-slot:footer>
               <b-container>
                 <b-row align-h="between">
                   <b-button
-                    v-if="deck.owner._id == $store.getters.user._id"
+                    v-if="deck.owner == $store.getters.user.id"
                     size="sm"
                     pill
                     variant="outline-secondary"
                     @click="onClick(deck.id)"
                   >Edit</b-button>
                   <b-button
-                    v-if="deck.owner._id != $store.getters.user._id"
+                    v-if="deck.owner != $store.getters.user.id"
                     size="sm"
                     pill
                     variant="outline-secondary"
@@ -60,7 +78,11 @@
       @click="onClick(deck.id)"
       class="deck bg-light"
       >{{deck.title}}</div>-->
-      <b-row align-h="between">
+      <b-row align-h="end">
+        <b-button size="lg" pill variant="outline-secondary">
+          Import deck
+          <!-- <router-link to="/mydecks/deck">Add Deck</router-link> -->
+        </b-button>
         <b-button size="lg" pill variant="outline-secondary" @click="onAddNewDeck()">
           Add new deck
           <!-- <router-link to="/mydecks/deck">Add Deck</router-link> -->
@@ -72,22 +94,29 @@
 
 <script>
 import DeckEditor from "../views/DeckEditor";
-import StarRating from "vue-star-rating";
+import {FaRating} from "vue-rate-it";
+import ThumbsUp from "vue-rate-it/glyphs/thumbs-up"
+import Fire from "vue-rate-it/glyphs/fire";
 
 export default {
   components: {
     DeckEditor,
-    StarRating
+    FaRating
   },
   data() {
     return {
-      decks: this.$store.getters.userDecks
+      decks: this.$store.getters.userDecks,
+      thumbsUp: '',
+      fire: '',
+      fireColor: "#F5F03A"
     };
   },
   created() {
+    this.thumbsUp = ThumbsUp;
+    this.fire = Fire;
     if (!this.decks) {
       this.fetchDecks();
-    } 
+    }
   },
   methods: {
     onSave() {},
@@ -113,6 +142,25 @@ export default {
     },
     onAddNewDeck() {
       this.$router.push({ name: "deck" });
+    },
+    setRating(rating, deckId) {
+      //TODO: make axios call
+      console.log(`${deckId} -> ${rating}`)
+    },
+    difficulty(difficultyNumber){
+      var difficultyString;
+      switch(difficultyNumber){
+        case 0: difficultyString = "easy"
+          break;
+        case 1: difficultyString = "medium"
+          break;
+        case 2: difficultyString = "hard"
+          break;
+        default:
+          difficultyString = "easy";
+          break; 
+      }
+      return difficultyString;
     }
   }
 };
@@ -121,5 +169,10 @@ export default {
 <style>
 .deck {
   margin: 10px;
+}
+
+.addDeck {
+  width: 10em;
+  height: 10em;
 }
 </style>

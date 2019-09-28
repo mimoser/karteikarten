@@ -69,40 +69,6 @@
         </b-col>
       </b-row>
       <b-container>
-        <!-- <b-row>
-          <b-col>
-            <b-table
-              id="cards-table"
-              :items="cardsTableProps.items"
-              :fields="cardsTableProps.fields"
-              :per-page="cardsTableProps.perPage"
-              :current-page="cardsTableProps.currentPage"
-              small
-              responsive
-              striped
-            >
-              <span slot="question" slot-scope="data" v-html="wrapInIframe(data.value)"></span>
-
-              <span slot="answer" slot-scope="data" v-html="wrapInIframe(data.value)"></span>
-            </b-table>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col>
-            <b-pagination
-              v-model="cardsTableProps.currentPage"
-              :total-rows="rows"
-              :per-page="cardsTableProps.perPage"
-              aria-controls="cards-table"
-              align="center"
-            ></b-pagination>
-          </b-col>
-        </b-row>
-        <b-row align-h="between">
-          <b-button @click="onSaveDeck">Save Deck</b-button>
-          <b-button @click="onDeleteDeck">Delete Deck</b-button>
-          <b-button v-b-modal.cardeditor-modal-center right>Add new card</b-button>
-        </b-row>-->
         <b-row align-h="between">
           <b-card-group columns>
             <b-card
@@ -311,7 +277,7 @@ export default {
             title: "Problem fetching deck",
             variant: "warning",
             toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
+            autoHideDelay: 1500,
             appendToast: true
           });
         });
@@ -378,16 +344,16 @@ export default {
                 title: "Deck saved",
                 variant: "info",
                 toaster: "b-toaster-top-center",
-                autoHideDelay: 3000,
+                autoHideDelay: 1500,
                 appendToast: true
               });
-              let that = this;
-              setTimeout(function() {
-                that.$router.push({
-                  name: "deck",
-                  params: { id: that.deck._id }
-                });
-              }, 3000);
+              // let that = this;
+              // setTimeout(function() {
+              //   that.$router.push({
+              //     name: "deck",
+              //     params: { id: that.deck._id }
+              //   });
+              // }, 1000);
             });
           }
           // let that = this;
@@ -410,14 +376,15 @@ export default {
         .dispatch("deleteDeck", this.deck._id)
         .then(response => {
           this.$store.dispatch("fetchUserDecks").then(response => {
-              this.$bvToast.toast(`Deck deleted. Redirecting.`, {
+              this.$bvToast.toast(`Deck deleted.`, {
                 title: "Deck deleted.",
                 variant: "info",
                 toaster: "b-toaster-top-center",
-                autoHideDelay: 3000,
+                autoHideDelay: 1500,
                 appendToast: true
               });
               let that = this;
+              this.loading = true;
               setTimeout(function() {
                 that.$router.push({ name: "mydecks" });
               }, 3000);
@@ -429,7 +396,7 @@ export default {
             title: "Problem deleting deck",
             variant: "warning",
             toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
+            autoHideDelay: 1500,
             appendToast: true
           });
         });
