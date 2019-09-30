@@ -17,6 +17,9 @@ const userSchema = mongoose.Schema({
         required: true,
     },
     decks: [{type: mongoose.Schema.Types.ObjectId, ref: 'Deck'}],
+    // Decks, die der Benutzer schon bewertet hat.
+    ratedDecks: { type: Map, of: Number },
+    ratedCards: { type: Map, of: Number}
 });
 
 userSchema.methods.validPassword = function (password) {

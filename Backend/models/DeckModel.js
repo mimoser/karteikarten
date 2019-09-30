@@ -22,7 +22,7 @@ deckSchema.methods.getDifficulty = async function(){
         });
     }
     
-     return difficulties / this.cards.length;
+     return (this.cards.length>0)? Math.round(difficulties / this.cards.length): 0;
 }
 
 

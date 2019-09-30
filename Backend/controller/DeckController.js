@@ -98,7 +98,7 @@ module.exports = {
                     let d = {
                         id: decks[i].id,
                         title: decks[i].title,
-                        owner: decks[i].owner.email,
+                        owner: decks[i].owner._id,
                         averageRating: decks[i].averageRating,
                         difficulty: difficulty
                     }
@@ -257,6 +257,10 @@ module.exports = {
                 res.status(401).send();
             }
         })
+    },
+
+    rateDeck: function(req, res) {
+        
     },
 
     subscribeDeck: function (req, res) {

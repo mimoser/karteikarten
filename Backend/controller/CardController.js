@@ -13,5 +13,8 @@ module.exports = {
         const deckId = req.param.deckId;
         const cardId = req.param.deckId;
 
+    },
+    rateCard: function (req, res) {
+        
     }
 }
