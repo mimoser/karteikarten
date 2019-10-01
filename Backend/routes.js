@@ -42,6 +42,9 @@ router.post('/decks', auth, deckCtrl.addDeck);
 router.put('/decks/:deckId', auth, deckCtrl.updateDeck);
 router.get('/userDecks', auth, deckCtrl.getUserDecks);
 router.delete('/decks/:deckId', auth, deckCtrl.deleteDeck);
+router.put('/subscribe/:deckId',auth, deckCtrl.subscribeDeck);
+router.put('/unsubscribe/:deckId',auth, deckCtrl.unsubscribeDeck);
+
 
 // // card
 // router.put('/decks/:deckId/cards', auth, deckCtrl.updateDeck);
