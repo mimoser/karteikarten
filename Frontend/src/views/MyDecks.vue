@@ -109,6 +109,7 @@
         </b-button>
       </b-row>
     </div>
+    {{file}}
   </b-container>
 </template>
 
@@ -189,7 +190,6 @@ export default {
     },
     importDeck() {
       this.file = this.$refs.file.files[0];
-      console.log(this.file);
       const token = localStorage.getItem("access_token");
       axios.defaults.headers.common["Authorization"] = "Bearer " + token;
       const formData = new FormData();
@@ -197,14 +197,15 @@ export default {
       axios
         .post(`http://localhost:3000/api/import`, formData)
         .then(response => {
-          console.log(response);
-          resolve(response);
+          // reset input form
+          this.file = "";
+          this.$refs.file.value = "";
         })
         .catch(error => {
           console.log(error);
-          // reject(error);
+          this.file = "";
+          this.$refs.file.value = "";
         });
-      this.file = "";
     }
   }
 };

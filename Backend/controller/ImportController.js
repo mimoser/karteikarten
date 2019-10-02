@@ -7,56 +7,38 @@ module.exports = {
 
     importDeck: function async(req, res) {
         try {
-            console.log("Hello Darkness my old friend!", req.file)
-            // change name of uploaded file to original name
-            sharp(req.file.path)
-                .embed()
-                .toFile(`../Import/${req.file.originalname}`);
-            console.log("Here");
-            fs.readFile(`../Import/${req.file.originalname}`, 'utf-8', (err, data) => {
-                if (err) { throw err; }
-                console.log('data: ', data);
+            console.log("Import start");
+            // console.log("file", req.file);
+            fs.readFile(req.file.path, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).send(err);
+                }
+                if (data) {
+                    // parse from buffer to json
+                    let jsonData = null;
+                    // check if valid json 
+                    try {
+                        jsonData = JSON.parse(data);
+                    } catch (e) {
+                        jsonData = null;
+                    }
+                    if (jsonData) {
+                        let deck = jsonData;
+                        console.log(deck);
+                        console.log("Import end");
+                        res.status(200).send("Upload successful");
+                    } else {
+                        console.log("Import end");
+                        res.status(406).send("Not valid JSON file. Please check your file!");
+                    }
+
+                }
             });
-            //const file = req.file;
+
         } catch (err) {
-            res.status(422).json({ err });
+            res.status(406).json({ err });
         }
 
-        // var data = validateJSON('some potential json data');
-        // if (data) {
-        //     // valid!
-        // }
-
-
-
-
-
-
-        // res.json({ file: req.file });
-
-        // console.log("Import start");
-        // const user = req.payload.email;
-        // const fileName = req.query.title;
-        // const file = fileName + '.json'
-        // fs.readFile(__dirname, '../Import/' + file, (err, data) => {
-        //     if (err) {
-        //         console.log(err);
-        //         res.status(500).send(err);
-        //     }
-        //     if (data) {
-        //         let deck = JSON.parse(data);
-        //         console.log(deck);
-        //         res.sendStatus(200);
-        //     }
-        // });
-    }, validaJSON(body) {
-        try {
-            var data = JSON.parse(body);
-            // if came to here, then valid
-            return data;
-        } catch (e) {
-            // failed to parse
-            return null;
-        }
     }
 }
