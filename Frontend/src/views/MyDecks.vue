@@ -19,7 +19,8 @@
             <template v-slot:header>
               <div>
                 <b-row align-h="between" align-v="center">
-                  <fa-rating :glyph="thumbsUp"
+                  <fa-rating
+                    :glyph="thumbsUp"
                     :read-only="(deck.owner===$store.getters.user.id)?true:false"
                     :increment="1"
                     :item-size="15"
@@ -33,17 +34,19 @@
                     :increment="1"
                     :rating="deck.averageRating"
                     @rating-selected="setRating($event, deck.id)"
-                  ></starRating> -->
+                  ></starRating>-->
 
-                  <fa-rating :glyph="fire"
-                  :read-only="true"
-                  :item-size="15"
-                  :max-rating="3"
-                  :active-color="fireColor"
-                  :rating="deck.difficulty"></fa-rating>
-                <!-- <b-col>
+                  <fa-rating
+                    :glyph="fire"
+                    :read-only="true"
+                    :item-size="15"
+                    :max-rating="3"
+                    :active-color="fireColor"
+                    :rating="deck.difficulty"
+                  ></fa-rating>
+                  <!-- <b-col>
                   {{difficulty(deck.difficulty)}}
-                </b-col> -->
+                  </b-col>-->
                 </b-row>
               </div>
             </template>
@@ -79,10 +82,27 @@
       class="deck bg-light"
       >{{deck.title}}</div>-->
       <b-row align-h="end">
+        <form enctype="multipart/form-data">
+          <div>
+            <b-button size="lg" pill variant="outline-secondary">
+              <input
+                accept="application/json, .json"
+                type="file"
+                name="file"
+                id="file"
+                class="inputfile"
+                @change="importDeck()"
+                ref="file"
+              />
+              <label for="file" class="margin_null cursor">Import deck</label>
+            </b-button>
+          </div>
+        </form>
+        <!--         
         <b-button size="lg" pill variant="outline-secondary">
           Import deck
-          <!-- <router-link to="/mydecks/deck">Add Deck</router-link> -->
-        </b-button>
+           <router-link to="/mydecks/deck">Add Deck</router-link> 
+        </b-button>-->
         <b-button size="lg" pill variant="outline-secondary" @click="onAddNewDeck()">
           Add new deck
           <!-- <router-link to="/mydecks/deck">Add Deck</router-link> -->
@@ -94,9 +114,10 @@
 
 <script>
 import DeckEditor from "../views/DeckEditor";
-import {FaRating} from "vue-rate-it";
-import ThumbsUp from "vue-rate-it/glyphs/thumbs-up"
+import { FaRating } from "vue-rate-it";
+import ThumbsUp from "vue-rate-it/glyphs/thumbs-up";
 import Fire from "vue-rate-it/glyphs/fire";
+import axios from "axios";
 
 export default {
   components: {
@@ -106,9 +127,10 @@ export default {
   data() {
     return {
       decks: this.$store.getters.userDecks,
-      thumbsUp: '',
-      fire: '',
-      fireColor: "#F5F03A"
+      thumbsUp: "",
+      fire: "",
+      fireColor: "#F5F03A",
+      file: ""
     };
   },
   created() {
@@ -145,22 +167,44 @@ export default {
     },
     setRating(rating, deckId) {
       //TODO: make axios call
-      console.log(`${deckId} -> ${rating}`)
+      console.log(`${deckId} -> ${rating}`);
     },
-    difficulty(difficultyNumber){
+    difficulty(difficultyNumber) {
       var difficultyString;
-      switch(difficultyNumber){
-        case 0: difficultyString = "easy"
+      switch (difficultyNumber) {
+        case 0:
+          difficultyString = "easy";
           break;
-        case 1: difficultyString = "medium"
+        case 1:
+          difficultyString = "medium";
           break;
-        case 2: difficultyString = "hard"
+        case 2:
+          difficultyString = "hard";
           break;
         default:
           difficultyString = "easy";
-          break; 
+          break;
       }
       return difficultyString;
+    },
+    importDeck() {
+      this.file = this.$refs.file.files[0];
+      console.log(this.file);
+      const token = localStorage.getItem("access_token");
+      axios.defaults.headers.common["Authorization"] = "Bearer " + token;
+      const formData = new FormData();
+      formData.append("file", this.file);
+      axios
+        .post(`http://localhost:3000/api/import`, formData)
+        .then(response => {
+          console.log(response);
+          resolve(response);
+        })
+        .catch(error => {
+          console.log(error);
+          // reject(error);
+        });
+      this.file = "";
     }
   }
 };
@@ -170,9 +214,23 @@ export default {
 .deck {
   margin: 10px;
 }
-
+.inputfile {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+  cursor: pointer;
+}
+.margin_null {
+  margin-bottom: 0;
+}
 .addDeck {
   width: 10em;
   height: 10em;
+}
+.cursor {
+  cursor: pointer;
 }
 </style>

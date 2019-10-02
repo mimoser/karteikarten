@@ -24,7 +24,7 @@ const port = process.env.port || 3000;
 app.use(bodyParser.urlencoded({
   extended: true,
 }));
-app.use(bodyParser.json({limit: '3000kb'}));
+app.use(bodyParser.json({ limit: '3000kb' }));
 
 // set up session cookies
 app.use(cookieSession({
@@ -38,8 +38,8 @@ app.use(passport.session());
 
 // connect to mongodb
 // mongoose.Promise = global.Promise; // angeblich seit Version 5 nicht mehr nötig
-mongoose.connect(process.env.MONGODB_URI, { 
-  useNewUrlParser: true, 
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
   keepAlive: true,
   reconnectTries: 10,
 }, () => {
@@ -47,7 +47,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 });
 
 // set up routes
-app.use('/api',routes);
+app.use('/api', routes);
 
 // error handlers
 // Catch unauthorised errors
@@ -57,6 +57,11 @@ app.use(function (err, req, res, next) {
     res.json({
       error: err.message,
     });
+  }
+  // Catch wrong file uploaded
+  if (err.code === 'LIMIT_FILE_TYPES') {
+    res.status(422).json({ error: "Only json is allowed!" });
+    return;
   }
 });
 
