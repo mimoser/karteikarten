@@ -37,6 +37,11 @@ const router = new Router({
       component: () => import(/* webpackChunkName: "deck" */ './views/Deck.vue')
     },
     {
+      path: '/mydecks/deck/:id/learn',
+      name: 'learn',
+      component: () => import(/* webpackChunkName: "deck" */ './views/Learn.vue')
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import(/* webpackChunkName: "login" */ './views/Login.vue')
