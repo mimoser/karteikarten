@@ -5,6 +5,9 @@ const { check } = require('express-validator');
 const cors = require('cors');
 const jwt = require('express-jwt');
 
+// file upload middleware
+const multer = require('multer');
+
 const userManagementCtrl = require('./controller/UserManagementController');
 const deckCtrl = require('./controller/DeckController');
 const profileCtrl = require('./controller/ProfileController');
@@ -14,6 +17,22 @@ const auth = jwt({
     secret: process.env.JWT_SECRET,
     userProperty: 'payload',
 });
+
+const fileFilter = function (req, file, cb) {
+    const allowTypes = ["application/json", ".json"];
+    if (!allowTypes.includes(file.mimetype)) {
+        const error = new Error("Wrong file type");
+        error.code = "LIMIT_FILE_TYPES"
+        return cb(error, false);
+    }
+    cb(null, true);
+
+}
+
+const upload = multer({
+    dest: "./Import/",
+    fileFilter
+})
 
 // cors options
 const corsOptions = {
@@ -59,7 +78,7 @@ router.put('/updateProfile', auth, profileCtrl.updateProfile);
 router.get('/export', auth, exportCtrl.exportDeck);
 
 // Import
-router.get('/import', auth, importCtrl.importDeck);
+router.post('/import', auth, upload.single("file"), importCtrl.importDeck);
 
 
 

@@ -82,16 +82,34 @@
       class="deck bg-light"
       >{{deck.title}}</div>-->
       <b-row align-h="end">
+        <form enctype="multipart/form-data">
+          <div>
+            <b-button size="lg" pill variant="outline-secondary">
+              <input
+                accept="application/json, .json"
+                type="file"
+                name="file"
+                id="file"
+                class="inputfile"
+                @change="importDeck()"
+                ref="file"
+              />
+              <label for="file" class="margin_null cursor">Import deck</label>
+            </b-button>
+          </div>
+        </form>
+        <!--         
         <b-button size="lg" pill variant="outline-secondary">
           Import deck
-          <!-- <router-link to="/mydecks/deck">Add Deck</router-link> -->
-        </b-button>
+           <router-link to="/mydecks/deck">Add Deck</router-link> 
+        </b-button>-->
         <b-button size="lg" pill variant="outline-secondary" @click="onAddNewDeck()">
           Add new deck
           <!-- <router-link to="/mydecks/deck">Add Deck</router-link> -->
         </b-button>
       </b-row>
     </div>
+    {{file}}
   </b-container>
 </template>
 
@@ -112,7 +130,8 @@ export default {
       decks: this.$store.getters.userDecks,
       thumbsUp: "",
       fire: "",
-      fireColor: "#F5F03A"
+      fireColor: "#F5F03A",
+      file: ""
     };
   },
   created() {
@@ -172,6 +191,25 @@ export default {
           break;
       }
       return difficultyString;
+    },
+    importDeck() {
+      this.file = this.$refs.file.files[0];
+      const token = localStorage.getItem("access_token");
+      axios.defaults.headers.common["Authorization"] = "Bearer " + token;
+      const formData = new FormData();
+      formData.append("file", this.file);
+      axios
+        .post(`http://localhost:3000/api/import`, formData)
+        .then(response => {
+          // reset input form
+          this.file = "";
+          this.$refs.file.value = "";
+        })
+        .catch(error => {
+          console.log(error);
+          this.file = "";
+          this.$refs.file.value = "";
+        });
     }
   }
 };
@@ -181,9 +219,23 @@ export default {
 .deck {
   margin: 10px;
 }
-
+.inputfile {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+  cursor: pointer;
+}
+.margin_null {
+  margin-bottom: 0;
+}
 .addDeck {
   width: 10em;
   height: 10em;
+}
+.cursor {
+  cursor: pointer;
 }
 </style>

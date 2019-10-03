@@ -29,7 +29,9 @@ module.exports = {
                 const newUser = new User({
                     email: email,
                     password: password, // passwordHash is saved instead of plaintext password
-                    name: username
+                    name: username,
+                    ratedDecks: {},
+                    ratedCards: {}
                 });
 
                 newUser.save().then(function (savedUser) {
