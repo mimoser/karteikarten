@@ -88,17 +88,23 @@ module.exports = {
                                 });
                             }, error => {
                                 console.log(error);
+                                fs.unlink(req.file.path, function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                    }
+                                    console.log('File deleted');
+                                });
                                 console.log("Import end");
                                 res.status(500).send(error);
                             });
-                            // delete file 
-                            fs.unlink(req.file.path, function (err) {
-                                if (err) {
-                                    console.log(err);
-                                }
-                                console.log('File deleted');
-                            });
                         };
+                        // delete file 
+                        fs.unlink(req.file.path, function (err) {
+                            if (err) {
+                                console.log(err);
+                            }
+                            console.log('File deleted');
+                        });
                     }
                 }
             });
