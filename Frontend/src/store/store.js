@@ -80,8 +80,10 @@ const store = new Vuex.Store({
                     axios.post('http://localhost:3000/api/logout')
                         .then(response => {
                             localStorage.removeItem('access_token');
+                            localStorage.removeItem('user');
                             context.commit('destroyToken');
                             context.commit('setUser', null);
+                            context.commit('setUserDecks', null);
                             // eslint-disable-next-line
                             resolve(response);
                             // context.commit('addTodo', response.data)
@@ -203,6 +205,46 @@ const store = new Vuex.Store({
                 }).catch(error => {
                     reject(error);
                 });
+            });
+        },
+        rateDeck(context, rate) {
+            return new Promise((resolve, reject) => {
+                axios.defaults.headers.common["Authorization"] =
+                    "Bearer " + context.state.accessToken;
+    
+                axios
+                    .post(`http://localhost:3000/api/ratedeck/${rate.deckId}`, {rating: rate.rating})
+                    .then(res => {
+                        console.log(res);
+                        resolve(res);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        reject(error);
+                    });
+            });
+
+        },
+        unsubscribeDeck(context, deckId){
+            return new Promise((resolve, reject) => {
+                axios.defaults.headers.common["Authorization"] =
+                    "Bearer " + context.state.accessToken;
+    
+                axios
+                    .put(`http://localhost:3000/api/unsubscribe/${deckId}`)
+                    .then(res => {
+                        console.log(res);
+                        context.dispatch("fetchUserDecks").then(result => {
+                            resolve(res);
+                        }).catch(error=> {
+                            console.log(error);
+                            reject(error);
+                        })
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        reject(error);
+                    });
             });
         }
     }

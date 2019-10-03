@@ -82,7 +82,6 @@ export default {
         if (!result) {
           return;
         }
-
         this.$store
           .dispatch("register", {
             email: this.email,

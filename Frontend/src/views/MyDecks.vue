@@ -65,6 +65,7 @@
                     size="sm"
                     pill
                     variant="outline-secondary"
+                    @click="unsubscribe(deck.id)"
                   >Unsubscribe</b-button>
                   <!-- <b-button v-if="deck.owner._id == $store.getters.user._id" size="sm" pill variant="outline-secondary">Deactivate</b-button> -->
                   <b-button size="sm" pill variant="outline-secondary">Learn</b-button>
@@ -167,8 +168,15 @@ export default {
       this.$router.push({ name: "deck" });
     },
     setRating(rating, deckId) {
-      //TODO: make axios call
       console.log(`${deckId} -> ${rating}`);
+      this.$store
+        .dispatch("rateDeck", { deckId: deckId, rating: rating })
+        .then(res => {
+          console.log(res);
+        })
+        .catch(error => {
+          console.log(error);
+        });
     },
     difficulty(difficultyNumber) {
       var difficultyString;
@@ -206,6 +214,14 @@ export default {
           this.file = "";
           this.$refs.file.value = "";
         });
+    },
+    unsubscribe(deckId) {
+      this.$store
+        .dispatch("unsubscribeDeck", deckId)
+        .then(res => {
+          this.decks = this.$store.getters.userDecks;
+        })
+        .catch(error => {});
     }
   }
 };

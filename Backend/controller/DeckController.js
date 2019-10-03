@@ -29,7 +29,7 @@ module.exports = {
         Deck.find(conditions).countDocuments().then(count => {
             if (count) {
                 maxDecks = count;
-                Deck.find(conditions).skip(offset).limit(pagesize).populate('owner', 'email').populate('cards').exec().then(publicDecks => {
+                Deck.find(conditions).skip(offset).limit(pagesize).populate({path: "owner"}).populate({path: "cards"}).then(publicDecks => {
                     if (publicDecks) {
                         let decks = new Array();
                         publicDecks.forEach(deck => {
@@ -259,15 +259,40 @@ module.exports = {
         })
     },
 
-    rateDeck: function(req, res) {
-        
+    rateDeck: function (req, res) {
+        var deckId = req.params.deckId;
+        User.findOne({ email: req.payload.email }).then(user => {
+
+            Deck.findOne({ _id: deckId }).then(deck => {
+                if (user.ratedDecks.get(deckId)) {
+                    var oldRating = user.ratedDecks.get(deckId);
+                    deck.correctRating(oldRating, req.body.rating);
+                    user.ratedDecks.set(deckId, req.body.rating);
+                    user.save();
+                } else {
+                    deck.addNewRating(req.body.rating);
+                    user.ratedDecks.set(deckId,req.body.rating);
+                    user.save();
+                }
+                deck.save();
+            }).catch(error => {
+
+            });
+        }).catch(error => {
+
+        });
+        // Deck.findOne({_id: deckId}).then(deck => {
+
+        // }).catch(error => {
+
+        // });
     },
 
     subscribeDeck: function (req, res) {
         var deckId = req.params.deckId;
         User.findOne({ email: req.payload.email }).then(user => {
 
-            Deck.findOne({_id: deckId}).then(deck => {
+            Deck.findOne({ _id: deckId }).then(deck => {
                 deck.subscribers.push(user);
                 user.decks.push(deck);
                 deck.save();
@@ -288,7 +313,7 @@ module.exports = {
         var deckId = req.params.deckId;
         User.findOne({ email: req.payload.email }).then(user => {
 
-            Deck.findOne({_id: deckId}).then(deck => {
+            Deck.findOne({ _id: deckId }).then(deck => {
                 deck.subscribers.remove(user._id);
                 user.decks.remove(deck._id);
                 deck.save();

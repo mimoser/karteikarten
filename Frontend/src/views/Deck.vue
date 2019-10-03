@@ -83,7 +83,18 @@
               style="max-width: 20rem;"
             >
               <template v-slot:header>
-                <div>Hier stehen Statistiken zur Karte</div>
+                <div>
+                  <b-row align-h="between">
+                    <fa-rating
+                      :glyph="fire"
+                      :read-only="true"
+                      :item-size="15"
+                      :max-rating="3"
+                      :active-color="fireColor"
+                      :rating="card.difficulty"
+                    ></fa-rating>
+                  </b-row>
+                </div>
               </template>
 
               <b-card-text style="min-height: 10rem; max-height: 10rem; overflow: hidden;">
@@ -147,6 +158,18 @@
               ></vue-editor>
             </b-col>
           </b-row>
+          <b-row align-h="end">
+            Schwierigkeit:
+            <fa-rating
+              :glyph="fire"
+              :read-only="false"
+              :item-size="15"
+              :max-rating="3"
+              :active-color="fireColor"
+              :rating="difficulty"
+              @rating-selected="ratingSelected"
+            ></fa-rating>
+          </b-row>
         </b-container>
       </b-modal>
 
@@ -183,6 +206,18 @@
               ></vue-editor>
             </b-col>
           </b-row>
+          <b-row align-h="end">
+            Schwierigkeit:
+            <fa-rating
+              :glyph="fire"
+              :read-only="false"
+              :item-size="15"
+              :max-rating="3"
+              :active-color="fireColor"
+              :rating="difficulty"
+              @rating-selected="ratingSelected"
+            ></fa-rating>
+          </b-row>
         </b-container>
       </b-modal>
     </div>
@@ -199,6 +234,9 @@ import { VueEditor } from "vue2-editor";
 import { ImageDrop } from "quill-image-drop-module";
 import ImageResize from "quill-image-resize-module";
 
+import { FaRating } from "vue-rate-it";
+import Fire from "vue-rate-it/glyphs/fire";
+
 Quill.register("modules/imageDrop", ImageDrop);
 Quill.register("modules/imageResize", ImageResize);
 
@@ -207,7 +245,8 @@ export default {
   components: {
     Cardeditor,
     VueEditor,
-    VueTagsInput
+    VueTagsInput,
+    FaRating
   },
   data() {
     return {
@@ -246,7 +285,10 @@ export default {
       tag: "",
       questionHtml: "",
       answerHtml: "",
-      currentlySelectedCard: null
+      difficulty: 0,
+      currentlySelectedCard: null,
+      fire: "",
+      fireColor: "#F5F03A"
     };
   },
   computed: {
@@ -261,6 +303,7 @@ export default {
       this.loading = false;
     }
     this.cardsTableProps.items = this.deck.cards;
+    this.fire = Fire;
   },
   methods: {
     fetchDeck() {
@@ -325,10 +368,11 @@ export default {
       this.deck.cards.push({
         question: this.questionHtml,
         answer: this.answerHtml,
-        difficulty: 2.5
+        difficulty: this.difficulty
       });
       this.questionHtml = "";
       this.answerHtml = "";
+      this.difficulty = 0;
     },
     onTableRowClicked() {
       console.log("sakldfjaslk");
@@ -376,20 +420,19 @@ export default {
         .dispatch("deleteDeck", this.deck._id)
         .then(response => {
           this.$store.dispatch("fetchUserDecks").then(response => {
-              this.$bvToast.toast(`Deck deleted.`, {
-                title: "Deck deleted.",
-                variant: "info",
-                toaster: "b-toaster-top-center",
-                autoHideDelay: 1500,
-                appendToast: true
-              });
-              let that = this;
-              this.loading = true;
-              setTimeout(function() {
-                that.$router.push({ name: "mydecks" });
-              }, 3000);
+            this.$bvToast.toast(`Deck deleted.`, {
+              title: "Deck deleted.",
+              variant: "info",
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 1500,
+              appendToast: true
             });
-
+            let that = this;
+            this.loading = true;
+            setTimeout(function() {
+              that.$router.push({ name: "mydecks" });
+            }, 3000);
+          });
         })
         .catch(error => {
           this.$bvToast.toast(`Couldn't delete deck`, {
@@ -408,11 +451,13 @@ export default {
       this.currentlySelectedCard = card;
       this.questionHtml = card.question;
       this.answerHtml = card.answer;
+      this.difficulty = card.difficulty;
     },
     onUpdateCard() {
       let i = this.deck.cards.indexOf(this.currentlySelectedCard);
       this.deck.cards[i].question = this.questionHtml;
       this.deck.cards[i].answer = this.answerHtml;
+      this.deck.cards[i].difficulty = this.difficulty;
       this.questionHtml = "";
       this.answerHtml = "";
       this.currentlySelectedCard = null;
@@ -459,6 +504,12 @@ export default {
         document.body.appendChild(link);
         link.click();
       });
+    },
+    cardDifficulty(index) {
+      return this.deck.cards[index].difficulty;
+    },
+    ratingSelected(rating) {
+      this.difficulty = rating;
     }
   }
 };
