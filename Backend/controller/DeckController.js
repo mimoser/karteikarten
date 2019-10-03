@@ -29,7 +29,7 @@ module.exports = {
         Deck.find(conditions).countDocuments().then(count => {
             if (count) {
                 maxDecks = count;
-                Deck.find(conditions).skip(offset).limit(pagesize).populate('owner', 'email').populate('cards').exec().then(publicDecks => {
+                Deck.find(conditions).skip(offset).limit(pagesize).populate({path: "owner"}).populate({path: "cards"}).then(publicDecks => {
                     if (publicDecks) {
                         let decks = new Array();
                         publicDecks.forEach(deck => {
