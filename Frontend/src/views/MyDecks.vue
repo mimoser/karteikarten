@@ -19,7 +19,8 @@
             <template v-slot:header>
               <div>
                 <b-row align-h="between" align-v="center">
-                  <fa-rating :glyph="thumbsUp"
+                  <fa-rating
+                    :glyph="thumbsUp"
                     :read-only="(deck.owner===$store.getters.user.id)?true:false"
                     :increment="1"
                     :item-size="15"
@@ -33,17 +34,19 @@
                     :increment="1"
                     :rating="deck.averageRating"
                     @rating-selected="setRating($event, deck.id)"
-                  ></starRating> -->
+                  ></starRating>-->
 
-                  <fa-rating :glyph="fire"
-                  :read-only="true"
-                  :item-size="15"
-                  :max-rating="3"
-                  :active-color="fireColor"
-                  :rating="deck.difficulty"></fa-rating>
-                <!-- <b-col>
+                  <fa-rating
+                    :glyph="fire"
+                    :read-only="true"
+                    :item-size="15"
+                    :max-rating="3"
+                    :active-color="fireColor"
+                    :rating="deck.difficulty"
+                  ></fa-rating>
+                  <!-- <b-col>
                   {{difficulty(deck.difficulty)}}
-                </b-col> -->
+                  </b-col>-->
                 </b-row>
               </div>
             </template>
@@ -94,9 +97,10 @@
 
 <script>
 import DeckEditor from "../views/DeckEditor";
-import {FaRating} from "vue-rate-it";
-import ThumbsUp from "vue-rate-it/glyphs/thumbs-up"
+import { FaRating } from "vue-rate-it";
+import ThumbsUp from "vue-rate-it/glyphs/thumbs-up";
 import Fire from "vue-rate-it/glyphs/fire";
+import axios from "axios";
 
 export default {
   components: {
@@ -106,8 +110,8 @@ export default {
   data() {
     return {
       decks: this.$store.getters.userDecks,
-      thumbsUp: '',
-      fire: '',
+      thumbsUp: "",
+      fire: "",
       fireColor: "#F5F03A"
     };
   },
@@ -145,20 +149,27 @@ export default {
     },
     setRating(rating, deckId) {
       //TODO: make axios call
-      console.log(`${deckId} -> ${rating}`)
+      console.log(`${deckId} -> ${rating}`);
+      this.$store
+        .dispatch("rateDeck", { deckId: deckId, rating: rating })
+        .then(res => {console.log(res);})
+        .catch(error => {console.log(error);});
     },
-    difficulty(difficultyNumber){
+    difficulty(difficultyNumber) {
       var difficultyString;
-      switch(difficultyNumber){
-        case 0: difficultyString = "easy"
+      switch (difficultyNumber) {
+        case 0:
+          difficultyString = "easy";
           break;
-        case 1: difficultyString = "medium"
+        case 1:
+          difficultyString = "medium";
           break;
-        case 2: difficultyString = "hard"
+        case 2:
+          difficultyString = "hard";
           break;
         default:
           difficultyString = "easy";
-          break; 
+          break;
       }
       return difficultyString;
     }

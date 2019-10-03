@@ -44,6 +44,7 @@ router.get('/userDecks', auth, deckCtrl.getUserDecks);
 router.delete('/decks/:deckId', auth, deckCtrl.deleteDeck);
 router.put('/subscribe/:deckId',auth, deckCtrl.subscribeDeck);
 router.put('/unsubscribe/:deckId',auth, deckCtrl.unsubscribeDeck);
+router.post('/ratedeck/:rating:deckId', auth, deckCtrl.rateDeck);
 
 
 // // card
