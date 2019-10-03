@@ -266,10 +266,12 @@ module.exports = {
             Deck.findOne({ _id: deckId }).then(deck => {
                 if (user.ratedDecks.get(deckId)) {
                     var oldRating = user.ratedDecks.get(deckId);
-                    deck.correctRating(oldRating, req.params.deckId);
+                    deck.correctRating(oldRating, req.body.rating);
+                    user.ratedDecks.set(deckId, req.body.rating);
+                    user.save();
                 } else {
-                    deck.addNewRating(req.params.rating);
-                    user.ratedDecks.set(deckId,req.params.rating);
+                    deck.addNewRating(req.body.rating);
+                    user.ratedDecks.set(deckId,req.body.rating);
                     user.save();
                 }
                 deck.save();

@@ -213,7 +213,7 @@ const store = new Vuex.Store({
                     "Bearer " + context.state.accessToken;
     
                 axios
-                    .post(`http://localhost:3000/api/ratedeck/${rate.deckId}${rate.rating}`)
+                    .post(`http://localhost:3000/api/ratedeck/${rate.deckId}`, {rating: rate.rating})
                     .then(res => {
                         console.log(res);
                         resolve(res);

@@ -7,7 +7,7 @@ const deckSchema = mongoose.Schema({
     cards: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Card' }],
     isPublic: { type: Boolean, default: false },
     averageRating: { type: Number, default: 2.5 },
-    numberRatings: {type: Number, default: 0},
+    numberRatings: {type: Number, default: 1},
     subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     tags: [String]   // wird für die Suche benutzt
 });
@@ -27,11 +27,13 @@ deckSchema.methods.getDifficulty = async function(){
 }
 
 deckSchema.methods.addNewRating = function (rating) {
-    averageRating = ((averageRating/numberRatings)+rating)/++numberRatings;
+    this.averageRating = ((this.averageRating*this.numberRatings)+rating)/++this.numberRatings;
 }
 
 deckSchema.methods.correctRating = function (oldRating, newRating) {
-    averageRating = (averageRating-oldRating+newRating)/numberRatings;
+    var oldAverage = ((this.averageRating*this.numberRatings)-oldRating)/(this.numberRatings-1);
+    var newAverage = (oldAverage*(this.numberRatings-1)+newRating)/(this.numberRatings);
+    this.averageRating = newAverage;
 }
 
 
