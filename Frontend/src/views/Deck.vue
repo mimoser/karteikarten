@@ -26,7 +26,11 @@
                   label-align-sm="right"
                   label-for="nested-title"
                 >
-                  <b-form-input id="nested-title" v-model="deck.title"></b-form-input>
+                  <b-form-input
+                    id="nested-title"
+                    v-model="deck.title"
+                    :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+                  ></b-form-input>
                 </b-form-group>
 
                 <b-form-group
@@ -36,7 +40,12 @@
                   label-for="nested-public"
                   class="mb-0"
                 >
-                  <b-form-checkbox id="nested-public" v-model="deck.isPublic" switch></b-form-checkbox>
+                  <b-form-checkbox
+                    id="nested-public"
+                    v-model="deck.isPublic"
+                    switch
+                    :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+                  ></b-form-checkbox>
                 </b-form-group>
 
                 <b-form-group
@@ -50,19 +59,33 @@
                     v-model="tag"
                     :tags="deck.tags"
                     @tags-changed="newTags => deck.tags = newTags"
+                    :disabled="deck.owner != $store.getters.user.id && !creatingNew"
                   />
                 </b-form-group>
               </b-col>
             </b-row>
             <b-row align-h="start">
-              <b-button size="sm" pill variant="outline-secondary" @click="onSaveDeck">Save Deck</b-button>
-              <b-button size="sm" pill variant="outline-secondary" @click="onDeleteDeck">Delete Deck</b-button>
+              <b-button
+                size="sm"
+                pill
+                variant="outline-secondary"
+                @click="onSaveDeck"
+                :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+              >Save Deck</b-button>
+              <b-button
+                size="sm"
+                pill
+                variant="outline-secondary"
+                @click="onDeleteDeck"
+                :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+              >Delete Deck</b-button>
               <b-button size="sm" pill variant="outline-secondary" @click="exportDeck">Export Deck</b-button>
               <b-button
                 size="sm"
                 pill
                 variant="outline-secondary"
                 v-b-modal.cardeditor-modal-center
+                :disabled="deck.owner != $store.getters.user.id  && !creatingNew"
               >Add new card</b-button>
             </b-row>
           </b-card>
@@ -79,7 +102,6 @@
               text-variant="black"
               class="text-center"
               header-tag="header"
-              footer-tag="footer"
               style="max-width: 20rem;"
             >
               <template v-slot:header>
@@ -93,6 +115,27 @@
                       :active-color="fireColor"
                       :rating="card.difficulty"
                     ></fa-rating>
+
+                    <b-dropdown id="options-dropdown" text="Card actions" class="m-md-2">
+                      <b-dropdown-item
+                        @click="onEditCard(card)"
+                        :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+                        v-b-modal.update-cardeditor-modal-center
+                      >Edit</b-dropdown-item>
+                      <b-dropdown-item
+                        v-b-modal.copy-cards-modal
+                        @click="onCopyOneCard(card._id)"
+                      >Copy to another Deck</b-dropdown-item>
+                      <b-dropdown-item
+                        v-b-modal.copy-cards-modal
+                        @click="onCopyAllCards(deck.cards)"
+                      >Copy ALL to another Deck</b-dropdown-item>
+                      <b-dropdown-divider></b-dropdown-divider>
+                      <b-dropdown-item
+                        @click="onDeleteCard(card)"
+                        :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+                      >Delete</b-dropdown-item>
+                    </b-dropdown>
                   </b-row>
                 </div>
               </template>
@@ -102,7 +145,7 @@
                 <!-- <iframe style="-webkit-transform:scale(0.5);-moz-transform-scale(0.5);" :srcdoc="card.question"></iframe> -->
               </b-card-text>
 
-              <template v-slot:footer>
+              <!-- <template v-slot:footer>
                 <b-container>
                   <b-row align-h="between">
                     <b-button
@@ -111,22 +154,25 @@
                       variant="outline-secondary"
                       @click="onEditCard(card)"
                       v-b-modal.update-cardeditor-modal-center
+                      :disabled="deck.owner != $store.getters.user.id"
                     >Edit</b-button>
                     <b-button
                       size="sm"
                       pill
                       variant="outline-secondary"
                       @click="onDeleteCard(card)"
+                      :disabled="deck.owner != $store.getters.user.id"
                     >Delete</b-button>
                   </b-row>
                 </b-container>
-              </template>
+              </template>-->
             </b-card>
           </b-card-group>
         </b-row>
       </b-container>
       <!-- cards list end -->
 
+      <!-- ADD CARD MODAL-->
       <b-modal
         id="cardeditor-modal-center"
         centered
@@ -173,6 +219,7 @@
         </b-container>
       </b-modal>
 
+      <!-- UPDATE CARDS MODAL -->
       <b-modal
         id="update-cardeditor-modal-center"
         centered
@@ -220,6 +267,29 @@
           </b-row>
         </b-container>
       </b-modal>
+
+      <!-- COPY CARDS MODAL -->
+      <b-modal
+        id="copy-cards-modal"
+        centered
+        size="xl"
+        title="Copy card(s)"
+        @ok="onSendCardsToAnotherDeck()"
+        @close="clearCardsToCopy()"
+        @cancel="clearCardsToCopy()"
+        ok-title="OK"
+      >
+        <b-container fluid>
+          <b-dropdown id="select-deck-dropdown" text="Select deck" class="m-md-2">
+            <b-dropdown-item
+              v-for="deck in getOwnerDecks()"
+              v-bind:key="deck.id"
+              @click="onDeckToCopySelected(deck)"
+            >{{deck.title}}</b-dropdown-item>
+          </b-dropdown>
+          {{deckToCopyTo.title}}
+        </b-container>
+      </b-modal>
     </div>
   </b-container>
 </template>
@@ -251,6 +321,7 @@ export default {
   data() {
     return {
       loading: true,
+      creatingNew: false,
       editorSettings: {
         modules: {
           imageDrop: true,
@@ -270,7 +341,8 @@ export default {
         isPublic: false,
         averageRating: null,
         cards: [],
-        _id: null
+        _id: null,
+        owner: null
       },
       cardsTableProps: {
         perPage: 10,
@@ -288,7 +360,9 @@ export default {
       difficulty: 0,
       currentlySelectedCard: null,
       fire: "",
-      fireColor: "#F5F03A"
+      fireColor: "#F5F03A",
+      cardsToCopy: [],
+      deckToCopyTo: {}
     };
   },
   computed: {
@@ -296,16 +370,37 @@ export default {
       return this.cardsTableProps.items.length;
     }
   },
-  created() {
+  async created() {
+    if (!this.$store.getters.userDecks) {
+      await this.$store.dispatch("fetchUserDecks");
+    }
+
     if (this.$route.params.id) {
       this.fetchDeck();
+      this.creatingNew = false;
     } else {
       this.loading = false;
+      this.creatingNew = true;
     }
     this.cardsTableProps.items = this.deck.cards;
     this.fire = Fire;
   },
   methods: {
+    getOwnerDecks() {
+      var that = this;
+      var ownerDecks = [];
+      for (var i = 0; i < this.$store.getters.userDecks.decks.length; i++) {
+        if(this.$store.getters.userDecks.decks[i].owner === this.$store.getters.user.id){
+          ownerDecks.push(this.$store.getters.userDecks.decks[i]);
+        }
+      }
+      // await this.$store.getters.userDecks.decks.forEach(deck => {
+      //   if (deck.owner === that.$store.getters.user.id) {
+      //     that.ownerDecks.push(deck);
+      //   }
+      // });
+      return ownerDecks;
+    },
     fetchDeck() {
       let that = this;
       this.$store
@@ -510,6 +605,36 @@ export default {
     },
     ratingSelected(rating) {
       this.difficulty = rating;
+    },
+    onCopyOneCard(cardId) {
+      console.log(cardId);
+      this.cardsToCopy.push(cardId);
+    },
+    onCopyAllCards(cards) {
+      console.log(cards);
+      for (var i = 0; i < cards.length; i++) {
+        this.cardsToCopy.push(cards[i]);
+      }
+    },
+    onSendCardsToAnotherDeck() {
+      console.log(this.cardsToCopy);
+      // send cards
+      this.$store
+        .dispatch("copyCards", {
+          deckId: this.deckToCopyTo.id,
+          cards: this.cardsToCopy
+        })
+        .then(res => {})
+        .catch(err => {});
+      // empty cardsToCopy
+      this.clearCardsToCopy();
+    },
+    clearCardsToCopy() {
+      this.cardsToCopy = [];
+      this.deckToCopyTo = {};
+    },
+    onDeckToCopySelected(deck) {
+      this.deckToCopyTo = deck;
     }
   }
 };

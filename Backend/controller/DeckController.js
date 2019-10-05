@@ -29,7 +29,7 @@ module.exports = {
         Deck.find(conditions).countDocuments().then(count => {
             if (count) {
                 maxDecks = count;
-                Deck.find(conditions).skip(offset).limit(pagesize).populate({path: "owner"}).populate({path: "cards"}).then(publicDecks => {
+                Deck.find(conditions).skip(offset).limit(pagesize).populate({ path: "owner" }).populate({ path: "cards" }).then(publicDecks => {
                     if (publicDecks) {
                         let decks = new Array();
                         publicDecks.forEach(deck => {
@@ -65,7 +65,7 @@ module.exports = {
         }).populate({
             path: 'subscribers',
             match: { email: req.payload.email }
-        }).populate('cards').then(deck => {
+        }).populate('cards').populate('owner').then(deck => {
             // deck.populate('cards');
             if (deck) {
                 res.status(200).send({
@@ -74,7 +74,8 @@ module.exports = {
                     averageRating: deck.averageRating,
                     _id: deck._id,
                     title: deck.title,
-                    tags: deck.tags
+                    tags: deck.tags,
+                    owner: deck.owner._id
                 });
             } else {
                 res.sendStatus(404);
@@ -259,6 +260,29 @@ module.exports = {
         })
     },
 
+    copyCards: function (req, res) {
+        console.log(req.params.deckId);
+        console.log(req.body.cards);
+        Deck.findOne({ _id: req.params.deckId }).then(deck => {
+            Card.find({ _id: { $in: req.body.cards } }).then(cards => {
+                cards.forEach(card => {
+                    var newCard = new Card({
+                        question: card.question,
+                        answer: card.answer,
+                        difficulty: card.difficulty
+                    });
+                    newCard.save();
+                    deck.cards.push(newCard);
+                })
+                deck.save();
+            }).catch(err => {
+
+            });
+        }).catch(err => {
+
+        });
+    },
+
     rateDeck: function (req, res) {
         var deckId = req.params.deckId;
         User.findOne({ email: req.payload.email }).then(user => {
@@ -271,7 +295,7 @@ module.exports = {
                     user.save();
                 } else {
                     deck.addNewRating(req.body.rating);
-                    user.ratedDecks.set(deckId,req.body.rating);
+                    user.ratedDecks.set(deckId, req.body.rating);
                     user.save();
                 }
                 deck.save();

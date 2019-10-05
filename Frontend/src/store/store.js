@@ -211,9 +211,9 @@ const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.defaults.headers.common["Authorization"] =
                     "Bearer " + context.state.accessToken;
-    
+
                 axios
-                    .post(`http://localhost:3000/api/ratedeck/${rate.deckId}`, {rating: rate.rating})
+                    .post(`http://localhost:3000/api/ratedeck/${rate.deckId}`, { rating: rate.rating })
                     .then(res => {
                         console.log(res);
                         resolve(res);
@@ -225,18 +225,40 @@ const store = new Vuex.Store({
             });
 
         },
-        unsubscribeDeck(context, deckId){
+        unsubscribeDeck(context, deckId) {
             return new Promise((resolve, reject) => {
                 axios.defaults.headers.common["Authorization"] =
                     "Bearer " + context.state.accessToken;
-    
+
                 axios
                     .put(`http://localhost:3000/api/unsubscribe/${deckId}`)
                     .then(res => {
                         console.log(res);
                         context.dispatch("fetchUserDecks").then(result => {
                             resolve(res);
-                        }).catch(error=> {
+                        }).catch(error => {
+                            console.log(error);
+                            reject(error);
+                        })
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        reject(error);
+                    });
+            });
+        },
+        copyCards(context, info) {
+            return new Promise((resolve, reject) => {
+                axios.defaults.headers.common["Authorization"] =
+                    "Bearer " + context.state.accessToken;
+
+                axios
+                    .post(`http://localhost:3000/api/copyCards/${info.deckId}`, {cards: info.cards})
+                    .then(res => {
+                        console.log(res);
+                        context.dispatch("fetchUserDecks").then(result => {
+                            resolve(res);
+                        }).catch(error => {
                             console.log(error);
                             reject(error);
                         })

@@ -12,10 +12,11 @@
             bg-variant="light"
             text-variant="black"
             class="text-center"
-            :title="deck.title"
+            no-body
             header-tag="header"
             footer-tag="footer"
           >
+          <b-card-title class="card-title"  @click="onClick(deck.id)">{{deck.title}}</b-card-title>
             <template v-slot:header>
               <div>
                 <b-row align-h="between" align-v="center">
@@ -53,13 +54,13 @@
             <template v-slot:footer>
               <b-container>
                 <b-row align-h="between">
-                  <b-button
+                  <!-- <b-button
                     v-if="deck.owner == $store.getters.user.id"
                     size="sm"
                     pill
                     variant="outline-secondary"
                     @click="onClick(deck.id)"
-                  >Edit</b-button>
+                  >Edit</b-button> -->
                   <b-button
                     v-if="deck.owner != $store.getters.user.id"
                     size="sm"
@@ -249,5 +250,9 @@ export default {
 }
 .cursor {
   cursor: pointer;
+}
+.card-title {
+  min-height: 2em;
+  padding: 1em;
 }
 </style>
