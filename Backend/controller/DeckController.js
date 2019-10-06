@@ -132,17 +132,21 @@ module.exports = {
             });
 
             let subscribers = new Array();
-            subscribers.push(user);
-
-
+            subscribers.push(user);        
+            
             let deck = new Deck({
                 owner: user,
                 title: req.body.deck.title,
                 cards: cards,
                 isPublic: req.body.deck.isPublic,
                 averageRating: req.body.deck.averageRating,
-                subscribers: subscribers
+                subscribers: subscribers,
+                tags: new Array()
             });
+            
+            for(var i = 0; i < req.body.deck.tags.length; i++){
+                deck.tags.push(req.body.deck.tags[i].text);
+            }
 
             deck.save().then(deck => {
                 user.decks.push(deck);
@@ -176,14 +180,14 @@ module.exports = {
 
                 var tags = Array.prototype.slice.call(req.body.deck.tags);
                 deck.tags = new Array();
-                tags.forEach(tag => {
+                tags.forEach(async tag => {
                     deck.tags.push(tag.text);
                 })
 
                 var cardsInDB = new Array();
                 var cardsToUpdate = new Array();
                 var newCards = new Array();
-                // var cardsToDelete = new Array();
+                var cardsToDelete = new Array();
 
                 for (var i = 0; i < deck.cards.length; i++) {
                     cardsInDB.push(deck.cards[i]._id.toString())
@@ -197,29 +201,71 @@ module.exports = {
                         cardsToUpdate.push(req.body.deck.cards[i]._id);
                     }
                 }
-                cardsInDB.forEach(async cardId => {
-                    if (!cardsToUpdate.includes(cardId)) {
-                        // cardsToDelete.push(cardId);
-                        await Card.findOneAndDelete({ _id: cardId });
+                
+                for(var i = 0; i < cardsInDB.length; i++){
+                    if (!cardsToUpdate.includes(cardsInDB[i])) {
+                        cardsToDelete.push(cardsInDB[i]);
                     }
-                });
-
-                cardsToUpdate.forEach(async cardId => {
-                    var card = req.body.deck.cards.find(card => card._id === cardId);
-                    await Card.findOneAndUpdate({ _id: cardId }, card, { new: true });
-                });
-
-                for (var i = 0; i < newCards.length; i++) {
-                    let c = new Card({ question: newCards[i].question, answer: newCards[i].answer, difficulty: newCards[i].difficulty });
-                    c.save();
-                    deck.cards.push(c);
                 }
 
-                deck.save().then(savedDeck => {
-                    res.status(200).json(savedDeck);
+                Card.find({ _id: { $in: cardsToDelete } }).then(async cards => {
+                    for(var i = 0; i < cards.length; i++){
+                        await cards[i].remove();
+                        deck.cards.pop(cards[i]);
+                    }
+                    Card.find({_id: { $in: cardsToUpdate}}).then(async cards => {
+                        for(var i = 0; i < cards.length; i++){
+                            var card = req.body.deck.cards.find(card => card._id === cards[i].id);
+                            await cards[i].update(card);
+                        }
+
+                        for (var i = 0; i < newCards.length; i++) {
+                            let c = new Card({ question: newCards[i].question, answer: newCards[i].answer, difficulty: newCards[i].difficulty });
+                            await c.save();
+                            deck.cards.push(c);
+                        }
+
+                        deck.save().then(savedDeck => {
+                            res.status(200).json(savedDeck);
+                        }).catch(error => {
+                            res.status(500).send();
+                        })
+
+                    }).catch(error => {
+
+                    });
+
                 }).catch(error => {
-                    res.status(500).send();
-                })
+                    console.log(error);
+                });
+
+
+
+                // cardsInDB.forEach(async cardId => {
+                //     if (!cardsToUpdate.includes(cardId)) {
+                //         // cardsToDelete.push(cardId);
+                //         await Card.findOneAndDelete({ _id: cardId }).then(async card=> {
+                //             await deck.cards.pop(card);
+                //         });
+                //     }
+                // });
+
+                // cardsToUpdate.forEach(async cardId => {
+                //     var card = req.body.deck.cards.find(card => card._id === cardId);
+                //     await Card.findOneAndUpdate({ _id: cardId }, card, { new: true });
+                // });
+
+                // for (var i = 0; i < newCards.length; i++) {
+                //     let c = new Card({ question: newCards[i].question, answer: newCards[i].answer, difficulty: newCards[i].difficulty });
+                //     c.save();
+                //     deck.cards.push(c);
+                // }
+
+                // deck.save().then(savedDeck => {
+                //     res.status(200).json(savedDeck);
+                // }).catch(error => {
+                //     res.status(500).send();
+                // })
 
             } else {
                 res.sendStatus(404);
@@ -275,6 +321,7 @@ module.exports = {
                     deck.cards.push(newCard);
                 })
                 deck.save();
+                res.status(200).send();
             }).catch(err => {
 
             });
