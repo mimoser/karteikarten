@@ -403,7 +403,6 @@ export default {
         });
     },
     isSubriber() {
-      console.log("here");
       // check is user is owner
       if (this.deck.owner !== this.$store.getters.user.id) {
         // check if user is subscriber of deck
@@ -603,16 +602,16 @@ export default {
       console.log(this.sub);
       if (this.sub) {
         this.$store
-          .dispatch("subscribeDeck", deckId)
+          .dispatch("subscribeDeck", this.deck_id)
           .then(res => {
-            this.decks = this.$store.getters.userDecks;
+            console.log("Done");
           })
           .catch(error => {});
       } else {
         this.$store
-          .dispatch("unsubscribeDeck", deckId)
-          .then(res => {
-            this.decks = this.$store.getters.userDecks;
+          .dispatch("unsubscribeDeck", this.deck_id)
+          .then(() => {
+            console.log("Done");
           })
           .catch(error => {});
       }

@@ -357,7 +357,7 @@ module.exports = {
 
         // });
     },
-
+    // TODO check if user is subscriber
     subscribeDeck: function (req, res) {
         console.log("sub");
         var deckId = req.params.deckId;
@@ -379,7 +379,7 @@ module.exports = {
         })
 
     },
-
+    // TODO check if user is subscriber
     unsubscribeDeck: function (req, res) {
         console.log("sub");
         var deckId = req.params.deckId;
