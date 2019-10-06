@@ -32,12 +32,12 @@ const router = new Router({
       component: () => import(/* webpackChunkName: "deckEditor" */ './views/DeckEditor.vue')
     },
     {
-      path: '/mydecks/deck/:id?',
+      path: '/deck/:id?',
       name: 'deck',
       component: () => import(/* webpackChunkName: "deck" */ './views/Deck.vue')
     },
     {
-      path: '/mydecks/deck/:id/learn',
+      path: '/deck/:id/learn',
       name: 'learn',
       component: () => import(/* webpackChunkName: "deck" */ './views/Learn.vue')
     },

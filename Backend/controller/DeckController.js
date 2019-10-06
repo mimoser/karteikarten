@@ -18,13 +18,11 @@ module.exports = {
         var and_clauses = []; // filter the search by any criteria given by the user
         and_clauses.push({ 'isPublic': true });
         if (req.query.search !== undefined && req.query.search !== 'null') {
-            console.log(req.query);
             and_clauses.push({ tags: { $eq: req.query.search } });
         }
         if (and_clauses.length > 0) {
             conditions['$and'] = and_clauses;
         }
-        console.log('conditions filled', conditions);
         // TODO get user to filter public decks 
         Deck.find(conditions).countDocuments().then(count => {
             if (count) {
@@ -75,7 +73,8 @@ module.exports = {
                     _id: deck._id,
                     title: deck.title,
                     tags: deck.tags,
-                    owner: deck.owner._id
+                    owner: deck.owner._id,
+                    subscribers: deck.subscribers
                 });
             } else {
                 res.sendStatus(404);
@@ -132,8 +131,8 @@ module.exports = {
             });
 
             let subscribers = new Array();
-            subscribers.push(user);        
-            
+            subscribers.push(user);
+
             let deck = new Deck({
                 owner: user,
                 title: req.body.deck.title,
@@ -143,8 +142,8 @@ module.exports = {
                 subscribers: subscribers,
                 tags: new Array()
             });
-            
-            for(var i = 0; i < req.body.deck.tags.length; i++){
+
+            for (var i = 0; i < req.body.deck.tags.length; i++) {
                 deck.tags.push(req.body.deck.tags[i].text);
             }
 
@@ -201,20 +200,20 @@ module.exports = {
                         cardsToUpdate.push(req.body.deck.cards[i]._id);
                     }
                 }
-                
-                for(var i = 0; i < cardsInDB.length; i++){
+
+                for (var i = 0; i < cardsInDB.length; i++) {
                     if (!cardsToUpdate.includes(cardsInDB[i])) {
                         cardsToDelete.push(cardsInDB[i]);
                     }
                 }
 
                 Card.find({ _id: { $in: cardsToDelete } }).then(async cards => {
-                    for(var i = 0; i < cards.length; i++){
+                    for (var i = 0; i < cards.length; i++) {
                         await cards[i].remove();
                         deck.cards.pop(cards[i]);
                     }
-                    Card.find({_id: { $in: cardsToUpdate}}).then(async cards => {
-                        for(var i = 0; i < cards.length; i++){
+                    Card.find({ _id: { $in: cardsToUpdate } }).then(async cards => {
+                        for (var i = 0; i < cards.length; i++) {
                             var card = req.body.deck.cards.find(card => card._id === cards[i].id);
                             await cards[i].update(card);
                         }
@@ -360,6 +359,7 @@ module.exports = {
     },
 
     subscribeDeck: function (req, res) {
+        console.log("sub");
         var deckId = req.params.deckId;
         User.findOne({ email: req.payload.email }).then(user => {
 
@@ -381,6 +381,7 @@ module.exports = {
     },
 
     unsubscribeDeck: function (req, res) {
+        console.log("sub");
         var deckId = req.params.deckId;
         User.findOne({ email: req.payload.email }).then(user => {
 

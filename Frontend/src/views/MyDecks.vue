@@ -4,6 +4,25 @@
       <b-spinner variant="primary" label="Spinner"></b-spinner>
     </div>
     <div v-else>
+      <b-row class="margin_bottom">
+        <form enctype="multipart/form-data">
+          <div>
+            <b-button class="margin_right" size="lg" pill variant="outline-secondary">
+              <input
+                accept="application/json, .json"
+                type="file"
+                name="file"
+                id="file"
+                class="inputfile"
+                @change="importDeck()"
+                ref="file"
+              />
+              <label for="file" class="margin_null cursor">Import deck</label>
+            </b-button>
+          </div>
+        </form>
+        <b-button size="lg" pill variant="outline-secondary" @click="onAddNewDeck()">Add new deck</b-button>
+      </b-row>
       <b-row>
         <b-card-group columns>
           <b-card
@@ -16,7 +35,7 @@
             header-tag="header"
             footer-tag="footer"
           >
-            <b-card-title class="card-title" @click="onClick(deck.id)">{{deck.title}}</b-card-title>
+            <b-card-title class="card-title link" @click="onClick(deck.id)">{{deck.title}}</b-card-title>
             <template v-slot:header>
               <div>
                 <b-row align-h="between" align-v="center">
@@ -55,34 +74,19 @@
                     variant="outline-secondary"
                     @click="moveToLearn(deck.id)"
                   >Learn</b-button>
+                  <b-button
+                    size="sm"
+                    pill
+                    variant="outline-secondary"
+                    @click="exportDeck(deck)"
+                  >Export</b-button>
                 </b-row>
               </b-container>
             </template>
           </b-card>
         </b-card-group>
       </b-row>
-      <b-row align-h="end">
-        <form enctype="multipart/form-data">
-          <div>
-            <b-button size="lg" pill variant="outline-secondary">
-              <input
-                accept="application/json, .json"
-                type="file"
-                name="file"
-                id="file"
-                class="inputfile"
-                @change="importDeck()"
-                ref="file"
-              />
-              <label for="file" class="margin_null cursor">Import deck</label>
-            </b-button>
-          </div>
-        </form>
-
-        <b-button size="lg" pill variant="outline-secondary" @click="onAddNewDeck()">Add new deck</b-button>
-      </b-row>
     </div>
-    {{file}}
   </b-container>
 </template>
 
@@ -197,6 +201,23 @@ export default {
           this.decks = this.$store.getters.userDecks;
         })
         .catch(error => {});
+    },
+    exportDeck(deck) {
+      console.log(deck);
+      const token = localStorage.getItem("access_token");
+      axios.defaults.headers.common["Authorization"] = "Bearer " + token;
+      axios({
+        url: `http://localhost:3000/api/export?deckId=${deck.id}`,
+        method: "GET",
+        responseType: "blob" // important
+      }).then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", deck.title + ".json"); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+      });
     }
   }
 };

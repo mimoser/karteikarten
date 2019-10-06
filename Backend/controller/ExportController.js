@@ -9,7 +9,6 @@ module.exports = {
 
     exportDeck: function (req, res) {
         const deckId = req.query.deckId;
-        const token = req.get('authorization');
         if (deckId && deckId !== undefined) {
             Deck.findOne({ _id: deckId }).populate('cards').then(deck => {
                 if (deck) {

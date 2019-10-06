@@ -42,6 +42,18 @@ export default {
   background: url(/link/to/your/image);
   background-size: 100%;
 }
-#form {
+.link {
+  color: inherit;
+  text-decoration: inherit;
+  cursor: pointer;
+}
+.link:hover {
+  text-decoration: underline;
+}
+.margin_bottom {
+  margin-bottom: 1em;
+}
+.margin_right {
+  margin-right: 1em;
 }
 </style>

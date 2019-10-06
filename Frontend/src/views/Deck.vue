@@ -6,7 +6,7 @@
       </div>
     </div>
     <div v-else>
-      <b-row>
+      <b-row class="margin_bottom">
         <b-col cols="12">
           <b-card bg-variant="light">
             <b-row>
@@ -64,29 +64,32 @@
                 </b-form-group>
               </b-col>
             </b-row>
-            <b-row align-h="start">
+            <b-row align-h="start" v-if="deck.owner === $store.getters.user.id">
               <b-button
                 size="sm"
                 pill
                 variant="outline-secondary"
                 @click="onSaveDeck"
-                :disabled="deck.owner != $store.getters.user.id && !creatingNew"
-              >Save Deck</b-button>
+                :disabled="(deck.owner !== $store.getters.user.id && deck._id)  || (deck.title === null || deck.title === '') "
+              >Deck speichern</b-button>
               <b-button
                 size="sm"
                 pill
                 variant="outline-secondary"
                 @click="onDeleteDeck"
-                :disabled="deck.owner != $store.getters.user.id && !creatingNew"
-              >Delete Deck</b-button>
-              <b-button size="sm" pill variant="outline-secondary" @click="exportDeck">Export Deck</b-button>
+                :disabled="(deck.owner !== $store.getters.user.id && creatingNew)  || (deck.title === null || deck.title === '') "
+              >Deck löschen</b-button>
               <b-button
                 size="sm"
                 pill
                 variant="outline-secondary"
                 v-b-modal.cardeditor-modal-center
                 :disabled="deck.owner != $store.getters.user.id  && !creatingNew"
-              >Add new card</b-button>
+              >Neue Karte hinzufügen</b-button>
+            </b-row>
+            <b-row v-else>
+              <span class="margin_right">Abonnieren</span>
+              <b-form-checkbox id="sub" v-model="sub" switch @change="subscription()"></b-form-checkbox>
             </b-row>
           </b-card>
         </b-col>
@@ -319,7 +322,8 @@ export default {
         averageRating: null,
         cards: [],
         _id: null,
-        owner: null
+        owner: null,
+        subscribers: []
       },
       cardsTableProps: {
         perPage: 10,
@@ -339,7 +343,8 @@ export default {
       fire: "",
       fireColor: "#F5F03A",
       cardsToCopy: [],
-      deckToCopyTo: {}
+      deckToCopyTo: {},
+      sub: true
     };
   },
   computed: {
@@ -380,6 +385,10 @@ export default {
         .dispatch("fetchDeck", this.$route.params.id)
         .then(response => {
           that.deck = response.data;
+          this.sub = false;
+          console.log(this.deck.subscribers);
+          this.isSubriber();
+
           that.cardsTableProps.items = that.deck.cards;
           that.loading = false;
         })
@@ -392,6 +401,20 @@ export default {
             appendToast: true
           });
         });
+    },
+    isSubriber() {
+      console.log("here");
+      // check is user is owner
+      if (this.deck.owner !== this.$store.getters.user.id) {
+        // check if user is subscriber of deck
+        for (let sub of this.deck.subscribers) {
+          if (sub._id === this.$store.getters.user.id) {
+            this.sub = true;
+          }
+        }
+      } else {
+        this.sub = true;
+      }
     },
     handleImageAdded(file, Editor, cursorLocation, resetUploader) {
       // may be the image needs to be resized before getting added
@@ -454,8 +477,8 @@ export default {
           }
         })
         .catch(error => {
-          this.$bvToast.toast(`Couldn't save deck`, {
-            title: "Problem saving deck",
+          this.$bvToast.toast(`Das Deck konnte nicht gespeichert werden.`, {
+            title: "Es gab ein Problem beim Speichern",
             variant: "warning",
             toaster: "b-toaster-top-center",
             autoHideDelay: 3000,
@@ -468,8 +491,8 @@ export default {
         .dispatch("deleteDeck", this.deck._id)
         .then(response => {
           this.$store.dispatch("fetchUserDecks").then(response => {
-            this.$bvToast.toast(`Deck deleted.`, {
-              title: "Deck deleted.",
+            this.$bvToast.toast(`Deck wurde gelöscht.`, {
+              title: "Deck gelöscht!.",
               variant: "info",
               toaster: "b-toaster-top-center",
               autoHideDelay: 1500,
@@ -483,13 +506,16 @@ export default {
           });
         })
         .catch(error => {
-          this.$bvToast.toast(`Couldn't delete deck`, {
-            title: "Problem deleting deck",
-            variant: "warning",
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-            appendToast: true
-          });
+          this.$bvToast.toast(
+            `Es gab ein Problem beim Löschen. Bitte probieren Sie es erneut.`,
+            {
+              title: "Das Deck konnte nicht gelöscht werden.",
+              variant: "warning",
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 1500,
+              appendToast: true
+            }
+          );
         });
     },
     wrapInIframe(html) {
@@ -537,22 +563,6 @@ export default {
       // encode image to data-uri with base64 version of compressed image
       return canvas.toDataURL();
     },
-    exportDeck() {
-      const token = localStorage.getItem("access_token");
-      axios.defaults.headers.common["Authorization"] = "Bearer " + token;
-      axios({
-        url: `http://localhost:3000/api/export?deckId=${this.deck._id}`,
-        method: "GET",
-        responseType: "blob" // important
-      }).then(response => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", this.deck.title + ".json"); //or any other extension
-        document.body.appendChild(link);
-        link.click();
-      });
-    },
     cardDifficulty(index) {
       return this.deck.cards[index].difficulty;
     },
@@ -588,6 +598,24 @@ export default {
     },
     onDeckToCopySelected(deck) {
       this.deckToCopyTo = deck;
+    },
+    subscription() {
+      console.log(this.sub);
+      if (this.sub) {
+        this.$store
+          .dispatch("subscribeDeck", deckId)
+          .then(res => {
+            this.decks = this.$store.getters.userDecks;
+          })
+          .catch(error => {});
+      } else {
+        this.$store
+          .dispatch("unsubscribeDeck", deckId)
+          .then(res => {
+            this.decks = this.$store.getters.userDecks;
+          })
+          .catch(error => {});
+      }
     }
   }
 };

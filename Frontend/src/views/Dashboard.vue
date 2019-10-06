@@ -14,19 +14,13 @@
         </b-input-group>
       </b-form-group>
     </div>
-    <!-- <div>
-      <select name="filter" class="margin-bottom">
-        <option value="Neueste">Neueste zuerst</option>
-        <option value="beliebt">Am beliebtesten</option>
-      </select>
-    </div>-->
     <div>
       <table class="table" id="my-table">
         <tbody>
           <template v-for="deck in decks">
             <tr class="row" v-bind:key="deck.id">
               <td class="full_length border">
-                <h4 class="align_center">{{deck.title}}</h4>
+                <h4 class="align_center link" @click="goToDeck(deck.id)">{{deck.title}}</h4>
                 <p>
                   Von {{deck.owner}}
                   <br />
@@ -89,13 +83,6 @@ export default {
     this.getPublicDecks();
   },
   methods: {
-    save: function() {
-      this.$bvToast.toast(`Karte wurde gespeichert`, {
-        title: "BootstrapVue Toast",
-        autoHideDelay: 3000,
-        appendToast: true
-      });
-    },
     showCurrentRating: function(rating) {
       this.currentRating =
         rating === 0
@@ -115,6 +102,9 @@ export default {
           this.maxDecks = response.data.maxDecks;
           this.loading = false;
         });
+    },
+    goToDeck: function(deckId) {
+      this.$router.push({ name: "deck", params: { id: deckId } });
     }
   }
 };
