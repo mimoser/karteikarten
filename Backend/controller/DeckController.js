@@ -381,8 +381,9 @@ module.exports = {
     },
     // TODO check if user is subscriber
     unsubscribeDeck: function (req, res) {
-        console.log("sub");
+
         var deckId = req.params.deckId;
+        console.log("sub", deckId);
         User.findOne({ email: req.payload.email }).then(user => {
 
             Deck.findOne({ _id: deckId }).then(deck => {

@@ -35,7 +35,7 @@
 
                 <b-form-group
                   label-cols-sm="3"
-                  label="Public:"
+                  label="Öffentlich:"
                   label-align-sm="right"
                   label-for="nested-public"
                   class="mb-0"
@@ -89,7 +89,7 @@
             </b-row>
             <b-row v-else>
               <span class="margin_right">Abonnieren</span>
-              <b-form-checkbox id="sub" v-model="sub" switch @change="subscription()"></b-form-checkbox>
+              <b-form-checkbox id="subc" v-model="sub" switch @change="subscription()"></b-form-checkbox>
             </b-row>
           </b-card>
         </b-col>
@@ -119,25 +119,25 @@
                       :rating="card.difficulty"
                     ></fa-rating>
 
-                    <b-dropdown id="options-dropdown" text="Card actions" class="m-md-2">
+                    <b-dropdown id="options-dropdown" text="Aktionen" class="m-md-2">
                       <b-dropdown-item
                         @click="onEditCard(card)"
                         :disabled="deck.owner != $store.getters.user.id && !creatingNew"
                         v-b-modal.update-cardeditor-modal-center
-                      >Edit</b-dropdown-item>
+                      >Bearbeiten</b-dropdown-item>
                       <b-dropdown-item
                         v-b-modal.copy-cards-modal
                         @click="onCopyOneCard(card._id)"
-                      >Copy to another Deck</b-dropdown-item>
+                      >Karte zu einem anderen Deck kopieren</b-dropdown-item>
                       <b-dropdown-item
                         v-b-modal.copy-cards-modal
                         @click="onCopyAllCards(deck.cards)"
-                      >Copy ALL to another Deck</b-dropdown-item>
+                      >Alle Karten zu einem anderen Deck kopieren</b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item
                         @click="onDeleteCard(card)"
                         :disabled="deck.owner != $store.getters.user.id && !creatingNew"
-                      >Delete</b-dropdown-item>
+                      >Löschen</b-dropdown-item>
                     </b-dropdown>
                   </b-row>
                 </div>
@@ -344,7 +344,7 @@ export default {
       fireColor: "#F5F03A",
       cardsToCopy: [],
       deckToCopyTo: {},
-      sub: true
+      sub: null
     };
   },
   computed: {
@@ -385,16 +385,14 @@ export default {
         .dispatch("fetchDeck", this.$route.params.id)
         .then(response => {
           that.deck = response.data;
-          this.sub = false;
-          console.log(this.deck.subscribers);
           this.isSubriber();
 
           that.cardsTableProps.items = that.deck.cards;
           that.loading = false;
         })
         .catch(error => {
-          this.$bvToast.toast(`Couldn't fetch deck`, {
-            title: "Problem fetching deck",
+          this.$bvToast.toast(`Deck konnte nicht heruntergeladen werden.`, {
+            title: "Problem beim Herunterladen",
             variant: "warning",
             toaster: "b-toaster-top-center",
             autoHideDelay: 1500,
@@ -455,9 +453,7 @@ export default {
       this.answerHtml = "";
       this.difficulty = 0;
     },
-    onTableRowClicked() {
-      console.log("sakldfjaslk");
-    },
+    onTableRowClicked() {},
     onSaveDeck() {
       this.$store
         .dispatch("saveDeck", this.deck)
@@ -569,17 +565,14 @@ export default {
       this.difficulty = rating;
     },
     onCopyOneCard(cardId) {
-      console.log(cardId);
       this.cardsToCopy.push(cardId);
     },
     onCopyAllCards(cards) {
-      console.log(cards);
       for (var i = 0; i < cards.length; i++) {
         this.cardsToCopy.push(cards[i]);
       }
     },
     onSendCardsToAnotherDeck() {
-      console.log(this.cardsToCopy);
       // send cards
       this.$store
         .dispatch("copyCards", {
@@ -599,21 +592,48 @@ export default {
       this.deckToCopyTo = deck;
     },
     subscription() {
-      console.log(this.sub);
-      if (this.sub) {
+      if (!this.sub) {
         this.$store
-          .dispatch("subscribeDeck", this.deck_id)
+          .dispatch("subscribeDeck", this.deck._id)
           .then(res => {
-            console.log("Done");
+            this.$bvToast.toast(`Deck erfolgreich abonniert.`, {
+              title: "Abonnieren erfolgreich!",
+              variant: "success",
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 1500,
+              appendToast: true
+            });
           })
-          .catch(error => {});
+          .catch(error => {
+            this.$bvToast.toast(`Deck konnte nicht abonniert werden.`, {
+              title: "Abonnieren fehlgeschlagen!",
+              variant: "danger",
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 1500,
+              appendToast: true
+            });
+          });
       } else {
         this.$store
-          .dispatch("unsubscribeDeck", this.deck_id)
+          .dispatch("unsubscribeDeck", this.deck._id)
           .then(() => {
-            console.log("Done");
+            this.$bvToast.toast(`Deck erfolgreich deabonniert.`, {
+              title: "Deabonnieren erfolgreich!",
+              variant: "success",
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 1500,
+              appendToast: true
+            });
           })
-          .catch(error => {});
+          .catch(error => {
+            this.$bvToast.toast(`Deck konnte nicht deabonniert werden.`, {
+              title: "Deabonnieren fehlgeschlagen!",
+              variant: "danger",
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 1500,
+              appendToast: true
+            });
+          });
       }
     }
   }

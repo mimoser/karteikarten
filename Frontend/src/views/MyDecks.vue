@@ -62,18 +62,11 @@
               <b-container>
                 <b-row align-h="between">
                   <b-button
-                    v-if="deck.owner != $store.getters.user.id"
-                    size="sm"
-                    pill
-                    variant="outline-secondary"
-                    @click="unsubscribe(deck.id)"
-                  >Unsubscribe</b-button>
-                  <b-button
                     size="sm"
                     pill
                     variant="outline-secondary"
                     @click="moveToLearn(deck.id)"
-                  >Learn</b-button>
+                  >Lernen</b-button>
                   <b-button
                     size="sm"
                     pill
@@ -193,14 +186,6 @@ export default {
           this.file = "";
           this.$refs.file.value = "";
         });
-    },
-    unsubscribe(deckId) {
-      this.$store
-        .dispatch("unsubscribeDeck", deckId)
-        .then(res => {
-          this.decks = this.$store.getters.userDecks;
-        })
-        .catch(error => {});
     },
     exportDeck(deck) {
       console.log(deck);

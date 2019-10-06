@@ -5,7 +5,7 @@
         <b-input-group>
           <b-form-input
             v-model="search"
-            placeholder="Search by tags"
+            placeholder="Suche nach Tags"
             v-on:change="getPublicDecks()"
           ></b-form-input>
           <b-input-group-append>
