@@ -367,11 +367,9 @@ export default {
       var that = this;
       var ownerDecks = [];
       for (var i = 0; i < this.$store.getters.userDecks.decks.length; i++) {
-        if (
-          this.$store.getters.userDecks.decks[i].owner ===
-          this.$store.getters.user.id
-        ) {
-          ownerDecks.push(this.$store.getters.userDecks.decks[i]);
+        var d = this.$store.getters.userDecks.decks[i];
+        if (d.owner === this.$store.getters.user.id && d.id != this.deck._id) {
+          ownerDecks.push(d);
         }
       }
       return ownerDecks;

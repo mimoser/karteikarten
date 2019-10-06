@@ -42,6 +42,7 @@ mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   keepAlive: true,
   reconnectTries: 10,
+  useFindAndModify: false
 }, () => {
   console.log('connected to mongodb');
 });
