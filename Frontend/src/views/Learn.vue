@@ -132,7 +132,7 @@ export default {
 .outer_box {
   max-width: 100%;
   min-height: 200px;
-  max-height: 600px;
+  min-height: 600px;
   overflow: auto;
 }
 .border_bottom {
