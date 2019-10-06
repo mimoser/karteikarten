@@ -1,39 +1,50 @@
 <template>
-<div class= "container">
-    <!-- <div class="learn_field" v-if="cardsToLearn.length > 0">
-        <p>{{cardsToLearn[randomLearnNumber].question}} </p>
-        <p>{{cardsToLearn[randomLearnNumber].answer}}</p> 
-        <p>{{randomLearnNumber}}</p>
-    </div> -->
-<div>
-  <b-card
-    style="max-width: 100%;"
-  >
-   <vue-editor v-model="cardsToLearn[randomLearnNumber].question">
-     <!-- Question {{cardsToLearn[randomLearnNumber].question}} -->
-     </vue-editor>
-    <vue-editor>
-    <b-card-text v-if="showAnswer">
-    Answer:{{cardsToLearn[randomLearnNumber].answer}}
-    </b-card-text>
-    </vue-editor>
-    <b-button v-if="!showAnswer" href="#" variant="primary" @click="showAnswer = true">Antwort anzeigen</b-button>
-  </b-card>
-</div>
-</div>
+  <div class="container">
+    <div v-if="loading" class="text-center">
+      <b-spinner variant="primary" label="Spinner"></b-spinner>
+    </div>
+    <div v-else>
+      <b-card class="outer_box">
+        <b-card class="no_border">
+          <h2>Frage</h2>
+          <b-card-text>
+            <h5 v-html="cardsToLearn[randomLearnNumber].question"></h5>
+          </b-card-text>
+          <b-button v-if="!showAnswer" variant="primary" @click="showAnswer = true">Antwort anzeigen</b-button>
+        </b-card>
+        <div v-if="showAnswer">
+          <div class="border_bottom"></div>
+          <b-card class="no_border">
+            <h2>Anwort</h2>
+            <b-card-text>
+              <h5 v-html="cardsToLearn[randomLearnNumber].answer"></h5>
+            </b-card-text>
+            <b-button-group>
+              <b-button variant="success" @click="known(cardsToLearn[randomLearnNumber])">Gewusst</b-button>
+              <!-- <b-button variant="primary" @click="showAnswer = true">Nicht gewusst</b-button> -->
+              <b-button
+                variant="danger"
+                @click="repeat(repeat(cardsToLearn[randomLearnNumber]))"
+              >Wiederholen</b-button>
+            </b-button-group>
+          </b-card>
+        </div>
+      </b-card>
+    </div>
+  </div>
 </template>
 
 <script>
-import Editor from "../components/CardEditor";
 import axios from "axios";
+import { VueEditor } from "vue2-editor";
 
 export default {
   components: {
-    Editor
+    VueEditor
   },
   data() {
     return {
-        deck: {
+      deck: {
         title: null,
         tags: [],
         isPublic: false,
@@ -43,23 +54,26 @@ export default {
       },
       cardsToLearn: [],
       knownCards: [],
-      learnLimit: 5,
+      repeatCards: [],
       randomLearnNumber: 0,
-      showAnswer: false
+      showAnswer: false,
+      loading: true
     };
   },
   mounted() {
     this.fetchDeck();
   },
   methods: {
-      fetchDeck() {
+    fetchDeck() {
+      this.loading = true;
       this.$store
         .dispatch("fetchDeck", this.$route.params.id)
         .then(response => {
           this.deck = response.data;
-          console.log(this.deck);
-          this.fillCardsToLearn();
-          this.randomLearnNumber = Math.floor(Math.random()*this.cardsToLearn.length)
+          this.cardsToLearn.push(...this.deck.cards);
+          this.randomLearnNumber = Math.floor(
+            Math.random() * this.cardsToLearn.length
+          );
           this.loading = false;
         })
         .catch(error => {
@@ -72,27 +86,63 @@ export default {
           });
         });
     },
-    fillCardsToLearn() {
-        if (this.deck.cards.length < this.learnLimit) {
-            this.cardsToLearn.push(...this.deck.cards);
-            console.log('cards', this.cardsToLearn);
-        } else {
-            for (let i = 0; i < this.learnLimit; i++ ) {
-                let card = this.deck.cards[Math.floor(Math.random() * this.deck.cards.length)];
-                this.cardsToLearn.push(card);
-            }
-            console.log('Cards to Learn', this.cardsToLearn);
-        }
-    }, 
-    
+    known(card) {
+      // put cards into knownCards Array for Statics
+      this.knownCards.push(card);
+      // filter card out of possible nextcards
+      this.cardsToLearn = this.cardsToLearn.filter(tmp => tmp._id !== card._id);
+      // calculate next random card
+      if (this.cardsToLearn.length > 0) {
+        this.randomLearnNumber = Math.floor(
+          Math.random() * this.cardsToLearn.length
+        );
+      } else {
+        // if last card was learned
+        this.$bvToast.toast(`Alle Karten wurden gerlent.`, {
+          title: "Lernen beendet!",
+          variant: "success",
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 1500,
+          appendToast: true
+        });
+        // get back
+
+        let that = this;
+        this.loading = true;
+        setTimeout(function() {
+          that.$router.push({ name: "mydecks" });
+        }, 3000);
+      }
+      this.showAnswer = false;
+    },
+    repeat(card) {
+      // put cards into repeatCards Array for Statics
+      this.repeatCards.push(card);
+      // calculate next random card
+      this.randomLearnNumber = Math.floor(
+        Math.random() * this.cardsToLearn.length
+      );
+      this.showAnswer = false;
+    }
   }
 };
 </script>
 
 <style>
-.learn_field {
-    height: 100px;
-    width: 200px;
+.outer_box {
+  max-width: 100%;
+  min-height: 200px;
+  max-height: 600px;
+  overflow: auto;
+}
+.border_bottom {
+  border-bottom: 1px solid;
+}
+.align_left {
+  float: left;
+}
+.no_border {
+  border: none;
 }
 </style>
 

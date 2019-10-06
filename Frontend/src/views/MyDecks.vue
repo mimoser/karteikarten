@@ -16,7 +16,7 @@
             header-tag="header"
             footer-tag="footer"
           >
-          <b-card-title class="card-title"  @click="onClick(deck.id)">{{deck.title}}</b-card-title>
+            <b-card-title class="card-title" @click="onClick(deck.id)">{{deck.title}}</b-card-title>
             <template v-slot:header>
               <div>
                 <b-row align-h="between" align-v="center">
@@ -28,15 +28,6 @@
                     :rating="deck.averageRating"
                     @rating-selected="setRating($event, deck.id)"
                   ></fa-rating>
-                  <!-- <starRating
-                    float="right"
-                    :star-size="20"
-                    :read-only="(deck.owner!=$store.getters.user.id)?true:false"
-                    :increment="1"
-                    :rating="deck.averageRating"
-                    @rating-selected="setRating($event, deck.id)"
-                  ></starRating>-->
-
                   <fa-rating
                     :glyph="fire"
                     :read-only="true"
@@ -45,22 +36,12 @@
                     :active-color="fireColor"
                     :rating="deck.difficulty"
                   ></fa-rating>
-                  <!-- <b-col>
-                  {{difficulty(deck.difficulty)}}
-                  </b-col>-->
                 </b-row>
               </div>
             </template>
             <template v-slot:footer>
               <b-container>
                 <b-row align-h="between">
-                  <!-- <b-button
-                    v-if="deck.owner == $store.getters.user.id"
-                    size="sm"
-                    pill
-                    variant="outline-secondary"
-                    @click="onClick(deck.id)"
-                  >Edit</b-button> -->
                   <b-button
                     v-if="deck.owner != $store.getters.user.id"
                     size="sm"
@@ -68,21 +49,18 @@
                     variant="outline-secondary"
                     @click="unsubscribe(deck.id)"
                   >Unsubscribe</b-button>
-                  <!-- <b-button v-if="deck.owner._id == $store.getters.user._id" size="sm" pill variant="outline-secondary">Deactivate</b-button> -->
-                  <b-button size="sm" pill variant="outline-secondary">Learn</b-button>
+                  <b-button
+                    size="sm"
+                    pill
+                    variant="outline-secondary"
+                    @click="moveToLearn(deck.id)"
+                  >Learn</b-button>
                 </b-row>
               </b-container>
             </template>
           </b-card>
         </b-card-group>
       </b-row>
-      <!-- <div
-      v-else
-      v-for="deck in decks.decks"
-      v-bind:key="deck.id"
-      @click="onClick(deck.id)"
-      class="deck bg-light"
-      >{{deck.title}}</div>-->
       <b-row align-h="end">
         <form enctype="multipart/form-data">
           <div>
@@ -100,15 +78,8 @@
             </b-button>
           </div>
         </form>
-        <!--         
-        <b-button size="lg" pill variant="outline-secondary">
-          Import deck
-           <router-link to="/mydecks/deck">Add Deck</router-link> 
-        </b-button>-->
-        <b-button size="lg" pill variant="outline-secondary" @click="onAddNewDeck()">
-          Add new deck
-          <!-- <router-link to="/mydecks/deck">Add Deck</router-link> -->
-        </b-button>
+
+        <b-button size="lg" pill variant="outline-secondary" @click="onAddNewDeck()">Add new deck</b-button>
       </b-row>
     </div>
     {{file}}
@@ -147,6 +118,9 @@ export default {
     onSave() {},
     onClick(deckId) {
       this.$router.push({ name: "deck", params: { id: deckId } });
+    },
+    moveToLearn(deckId) {
+      this.$router.push({ name: "learn", params: { id: deckId } });
     },
     fetchDecks() {
       let that = this;
@@ -254,5 +228,6 @@ export default {
 .card-title {
   min-height: 2em;
   padding: 1em;
+  cursor: pointer;
 }
 </style>

@@ -142,30 +142,7 @@
 
               <b-card-text style="min-height: 10rem; max-height: 10rem; overflow: hidden;">
                 <div v-html="card.question"></div>
-                <!-- <iframe style="-webkit-transform:scale(0.5);-moz-transform-scale(0.5);" :srcdoc="card.question"></iframe> -->
               </b-card-text>
-
-              <!-- <template v-slot:footer>
-                <b-container>
-                  <b-row align-h="between">
-                    <b-button
-                      size="sm"
-                      pill
-                      variant="outline-secondary"
-                      @click="onEditCard(card)"
-                      v-b-modal.update-cardeditor-modal-center
-                      :disabled="deck.owner != $store.getters.user.id"
-                    >Edit</b-button>
-                    <b-button
-                      size="sm"
-                      pill
-                      variant="outline-secondary"
-                      @click="onDeleteCard(card)"
-                      :disabled="deck.owner != $store.getters.user.id"
-                    >Delete</b-button>
-                  </b-row>
-                </b-container>
-              </template>-->
             </b-card>
           </b-card-group>
         </b-row>
@@ -390,15 +367,13 @@ export default {
       var that = this;
       var ownerDecks = [];
       for (var i = 0; i < this.$store.getters.userDecks.decks.length; i++) {
-        if(this.$store.getters.userDecks.decks[i].owner === this.$store.getters.user.id){
+        if (
+          this.$store.getters.userDecks.decks[i].owner ===
+          this.$store.getters.user.id
+        ) {
           ownerDecks.push(this.$store.getters.userDecks.decks[i]);
         }
       }
-      // await this.$store.getters.userDecks.decks.forEach(deck => {
-      //   if (deck.owner === that.$store.getters.user.id) {
-      //     that.ownerDecks.push(deck);
-      //   }
-      // });
       return ownerDecks;
     },
     fetchDeck() {
@@ -449,17 +424,8 @@ export default {
         resetUploader();
       };
       image.src = URL.createObjectURL(file);
-
-      // let fileReader = new FileReader();
-      // fileReader.readAsDataURL(file);
-      // fileReader.onloadend = function(evt) {
-      //   Editor.insertEmbed(cursorLocation, "image", evt.target.result);
-      //   resetUploader();
-      // };
     },
     onAddCard() {
-      // let qHtml = `<iframe>${this.questionHtml}</iframe>`;
-      // let aHtml = `<iframe>${this.answerHtml}</iframe>`;
       this.deck.cards.push({
         question: this.questionHtml,
         answer: this.answerHtml,
@@ -486,19 +452,8 @@ export default {
                 autoHideDelay: 1500,
                 appendToast: true
               });
-              // let that = this;
-              // setTimeout(function() {
-              //   that.$router.push({
-              //     name: "deck",
-              //     params: { id: that.deck._id }
-              //   });
-              // }, 1000);
             });
           }
-          // let that = this;
-          //   setTimeout(function() {
-          //     that.$router.push({ name: "deck", params: { id: that.deck._id } });
-          //   }, 3000);
         })
         .catch(error => {
           this.$bvToast.toast(`Couldn't save deck`, {
