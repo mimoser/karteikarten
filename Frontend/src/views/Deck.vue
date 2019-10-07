@@ -42,6 +42,7 @@
                 >
                   <b-form-checkbox
                     id="nested-public"
+                    class="float_left"
                     v-model="deck.isPublic"
                     switch
                     :disabled="deck.owner != $store.getters.user.id && !creatingNew"
@@ -642,5 +643,9 @@ export default {
 <style>
 h4 {
   text-align: center;
+}
+.float_left {
+  margin-top: 6px;
+  float: left;
 }
 </style>
