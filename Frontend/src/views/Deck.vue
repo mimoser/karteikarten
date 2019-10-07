@@ -64,7 +64,7 @@
                 </b-form-group>
               </b-col>
             </b-row>
-            <b-row align-h="start" v-if="deck.owner === $store.getters.user.id">
+            <b-row align-h="start" v-if="deck.owner === $store.getters.user.id || creatingNew">
               <b-button
                 size="sm"
                 pill

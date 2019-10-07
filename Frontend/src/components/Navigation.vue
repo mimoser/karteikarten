@@ -13,13 +13,17 @@
               <router-link active-class="active" class="nav-item nav-link" to="/login">Login</router-link>
             </b-nav-item>
             <b-nav-item v-if="!user">
-              <router-link active-class="active" class="nav-item nav-link" to="/register">Register</router-link>
+              <router-link
+                active-class="active"
+                class="nav-item nav-link"
+                to="/register"
+              >Registrieren</router-link>
             </b-nav-item>
             <b-nav-item v-if="user">
-              <router-link active-class="active" class="nav-item nav-link" to="/mydecks">My Decks</router-link>
+              <router-link active-class="active" class="nav-item nav-link" to="/mydecks">Meine Decks</router-link>
             </b-nav-item>
             <b-nav-item v-if="user">
-              <router-link active-class="active" class="nav-item nav-link" to="/profile">Profile</router-link>
+              <router-link active-class="active" class="nav-item nav-link" to="/profile">Profil</router-link>
             </b-nav-item>
             <b-nav-item v-if="user">
               <router-link active-class="active" class="nav-item nav-link" to="/logout">Logout</router-link>
