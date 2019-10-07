@@ -363,11 +363,15 @@ module.exports = {
         User.findOne({ email: req.payload.email }).then(user => {
 
             Deck.findOne({ _id: deckId }).then(deck => {
-                deck.subscribers.push(user);
-                user.decks.push(deck);
-                deck.save();
-                user.save();
-                res.status(200).send();
+                if(deck.subscribers.includes(user._id)){
+                    res.status(500).send();
+                } else {
+                    deck.subscribers.push(user);
+                    user.decks.push(deck);
+                    deck.save();
+                    user.save();
+                    res.status(200).send();
+                }
             }).catch(error => {
                 console.log(error);
                 res.status(500).send();
@@ -385,11 +389,15 @@ module.exports = {
         User.findOne({ email: req.payload.email }).then(user => {
 
             Deck.findOne({ _id: deckId }).then(deck => {
-                deck.subscribers.remove(user._id);
-                user.decks.remove(deck._id);
-                deck.save();
-                user.save();
-                res.status(200).send();
+                if(!deck.subscribers.includes(user._id)){
+                    res.status(500).send();
+                } else {
+                    deck.subscribers.remove(user._id);
+                    user.decks.remove(deck._id);
+                    deck.save();
+                    user.save();
+                    res.status(200).send();
+                }
             }).catch(error => {
                 console.log(error);
                 res.status(500).send();
