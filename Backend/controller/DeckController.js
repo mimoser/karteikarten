@@ -18,16 +18,17 @@ module.exports = {
         var and_clauses = []; // filter the search by any criteria given by the user
         and_clauses.push({ 'isPublic': true });
         if (req.query.search !== undefined && req.query.search !== 'null') {
-            and_clauses.push({ tags: { $eq: req.query.search } });
+            const search = ".*" + req.query.search + ".*";
+            and_clauses.push({ tags: { $regex: search } });
         }
         if (and_clauses.length > 0) {
             conditions['$and'] = and_clauses;
         }
-        // TODO get user to filter public decks 
         Deck.find(conditions).countDocuments().then(count => {
             if (count) {
                 maxDecks = count;
                 Deck.find(conditions).skip(offset).limit(pagesize).populate({ path: "owner" }).populate({ path: "cards" }).then(publicDecks => {
+                    console.log(publicDecks);
                     if (publicDecks) {
                         let decks = new Array();
                         publicDecks.forEach(deck => {

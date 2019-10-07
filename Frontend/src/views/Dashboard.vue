@@ -99,6 +99,17 @@ export default {
           this.decks = response.data.decks;
           this.maxDecks = response.data.maxDecks;
           this.loading = false;
+        })
+        .catch(error => {
+          this.loading = false;
+          this.decks = [];
+          this.$bvToast.toast(`Es konnte kein Deck gefunden werden.`, {
+            title: "Kein Deck gefunden!",
+            variant: "info",
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 1500,
+            appendToast: true
+          });
         });
     },
     goToDeck: function(deckId) {
