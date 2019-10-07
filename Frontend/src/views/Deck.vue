@@ -276,9 +276,7 @@
 </template>
 
 <script>
-import Cardeditor from "../components/CardEditor";
 import VueTagsInput from "@johmun/vue-tags-input";
-import axios from "axios";
 import Quill from "quill";
 
 import { VueEditor } from "vue2-editor";
@@ -294,7 +292,6 @@ Quill.register("modules/imageResize", ImageResize);
 export default {
   name: "deck",
   components: {
-    Cardeditor,
     VueEditor,
     VueTagsInput,
     FaRating
@@ -370,7 +367,6 @@ export default {
   },
   methods: {
     getOwnerDecks() {
-      var that = this;
       var ownerDecks = [];
       for (var i = 0; i < this.$store.getters.userDecks.decks.length; i++) {
         var d = this.$store.getters.userDecks.decks[i];
@@ -391,7 +387,7 @@ export default {
           that.cardsTableProps.items = that.deck.cards;
           that.loading = false;
         })
-        .catch(error => {
+        .catch(() => {
           this.$bvToast.toast(`Deck konnte nicht heruntergeladen werden.`, {
             title: "Problem beim Herunterladen",
             variant: "warning",
@@ -424,7 +420,6 @@ export default {
 
       var image = new Image();
       image.onload = function() {
-        var maxWidth = 250;
         var maxHeight = 250;
         var ratio = Math.min(maxHeight / this.width, maxHeight / this.height);
         var width = this.width * ratio;
@@ -461,7 +456,7 @@ export default {
         .then(response => {
           if (response.data._id) {
             this.deck._id = response.data._id;
-            this.$store.dispatch("fetchUserDecks").then(response => {
+            this.$store.dispatch("fetchUserDecks").then(() => {
               this.$bvToast.toast(`Deck saved`, {
                 title: "Deck saved",
                 variant: "info",
@@ -472,7 +467,7 @@ export default {
             });
           }
         })
-        .catch(error => {
+        .catch(() => {
           this.$bvToast.toast(`Das Deck konnte nicht gespeichert werden.`, {
             title: "Es gab ein Problem beim Speichern",
             variant: "warning",
@@ -485,8 +480,8 @@ export default {
     onDeleteDeck() {
       this.$store
         .dispatch("deleteDeck", this.deck._id)
-        .then(response => {
-          this.$store.dispatch("fetchUserDecks").then(response => {
+        .then(() => {
+          this.$store.dispatch("fetchUserDecks").then(() => {
             this.$bvToast.toast(`Deck wurde gelöscht.`, {
               title: "Deck gelöscht!.",
               variant: "info",
@@ -501,7 +496,7 @@ export default {
             }, 3000);
           });
         })
-        .catch(error => {
+        .catch(() => {
           this.$bvToast.toast(
             `Es gab ein Problem beim Löschen. Bitte probieren Sie es erneut.`,
             {
@@ -580,8 +575,8 @@ export default {
           deckId: this.deckToCopyTo.id,
           cards: this.cardsToCopy
         })
-        .then(res => {})
-        .catch(err => {});
+        .then(() => {})
+        .catch(() => {});
       // empty cardsToCopy
       this.clearCardsToCopy();
     },
@@ -596,7 +591,7 @@ export default {
       if (!this.sub) {
         this.$store
           .dispatch("subscribeDeck", this.deck._id)
-          .then(res => {
+          .then(() => {
             this.$bvToast.toast(`Deck erfolgreich abonniert.`, {
               title: "Abonnieren erfolgreich!",
               variant: "success",
@@ -605,7 +600,7 @@ export default {
               appendToast: true
             });
           })
-          .catch(error => {
+          .catch(() => {
             this.$bvToast.toast(`Deck konnte nicht abonniert werden.`, {
               title: "Abonnieren fehlgeschlagen!",
               variant: "danger",
@@ -626,7 +621,7 @@ export default {
               appendToast: true
             });
           })
-          .catch(error => {
+          .catch(() => {
             this.$bvToast.toast(`Deck konnte nicht deabonniert werden.`, {
               title: "Deabonnieren fehlgeschlagen!",
               variant: "danger",

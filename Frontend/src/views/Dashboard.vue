@@ -109,7 +109,7 @@ export default {
           }
           this.loading = false;
         })
-        .catch(error => {
+        .catch(() => {
           this.loading = false;
           this.decks = [];
           this.$bvToast.toast(`Es konnte kein Deck gefunden werden.`, {
