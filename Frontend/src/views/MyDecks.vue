@@ -21,7 +21,12 @@
             </b-button>
           </div>
         </form>
-        <b-button size="lg" pill variant="outline-secondary" @click="onAddNewDeck()">Add new deck</b-button>
+        <b-button
+          size="lg"
+          pill
+          variant="outline-secondary"
+          @click="onAddNewDeck()"
+        >Neues Deck hinzufügen</b-button>
       </b-row>
       <b-row>
         <b-card-group columns>
