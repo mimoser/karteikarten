@@ -60,13 +60,11 @@
 </template>
 
 <script>
-import Editor from "../components/CardEditor";
 import StarRating from "vue-star-rating";
 import axios from "axios";
 
 export default {
   components: {
-    Editor,
     StarRating
   },
   data() {
