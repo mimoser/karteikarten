@@ -10,14 +10,15 @@ module.exports = {
         const pagesize = parseInt(req.query.pageSize) || 10;
         const page = parseInt(req.query.page) || 1
         const offset = (page - 1) * pagesize;
-        const user = req.query.user;
         let maxDecks = 0;
 
         // conditions object
+        console.log(req.query.search);
         var conditions = {};
         var and_clauses = []; // filter the search by any criteria given by the user
         and_clauses.push({ 'isPublic': true });
-        if (req.query.search !== undefined && req.query.search !== 'null') {
+        if (req.query.search !== undefined && req.query.search !== 'null' && req.query.search !== "") {
+            console.log(req.query.search);
             const search = ".*" + req.query.search + ".*";
             and_clauses.push({ tags: { $regex: search } });
         }
@@ -25,10 +26,11 @@ module.exports = {
             conditions['$and'] = and_clauses;
         }
         Deck.find(conditions).countDocuments().then(count => {
-            if (count) {
+            console.log("here", count);
+            if (count > 0) {
                 maxDecks = count;
                 Deck.find(conditions).skip(offset).limit(pagesize).populate({ path: "owner" }).populate({ path: "cards" }).then(publicDecks => {
-                    console.log(publicDecks);
+
                     if (publicDecks) {
                         let decks = new Array();
                         publicDecks.forEach(deck => {
@@ -50,6 +52,9 @@ module.exports = {
                     console.log(error);
                     res.status(500).send(error);
                 });
+            } else {
+                let decks = new Array();
+                res.status(200).json({ "decks": decks, maxDecks: maxDecks });
             }
         });
 
