@@ -98,6 +98,15 @@ export default {
         .then(response => {
           this.decks = response.data.decks;
           this.maxDecks = response.data.maxDecks;
+          if (this.maxDecks == 0) {
+            this.$bvToast.toast(`Es konnte kein Deck gefunden werden.`, {
+              title: "Kein Deck gefunden!",
+              variant: "info",
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 1500,
+              appendToast: true
+            });
+          }
           this.loading = false;
         })
         .catch(error => {
