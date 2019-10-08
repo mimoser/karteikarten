@@ -35,7 +35,7 @@
             v-bind:key="deck.id"
             bg-variant="light"
             text-variant="black"
-            class="text-center"
+            class="text-center min_width"
             no-body
             header-tag="header"
             footer-tag="footer"
@@ -245,5 +245,8 @@ export default {
   min-height: 2em;
   padding: 1em;
   cursor: pointer;
+}
+.min_width {
+  min-width: 300px;
 }
 </style>
