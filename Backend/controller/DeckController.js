@@ -120,8 +120,6 @@ module.exports = {
     },
 
     addDeck: function (req, res) {
-        console.log(req.body);
-
         User.findOne(
             { email: req.payload.email }
         ).then(user => {
@@ -153,7 +151,7 @@ module.exports = {
             deck.save().then(deck => {
                 user.decks.push(deck);
                 user.save().then(user => {
-                    res.status(200).json({ _id: deck.id });
+                    res.status(200).json({ _id: deck.id, owner: deck.owner._id });
                 }, error => {
                     console.log(error);
                     res.status(500).send(error);

@@ -100,7 +100,7 @@ export default {
   },
   data() {
     return {
-      decks: this.$store.getters.userDecks,
+      decks: null,
       thumbsUp: "",
       fire: "",
       fireColor: "#F5F03A",
@@ -184,11 +184,12 @@ export default {
             autoHideDelay: 3000,
             appendToast: true
           });
+          this.fetchDecks();
         })
         .catch(error => {
           this.file = "";
           this.$refs.file.value = "";
-          this.$bvToast.toast(`${error}`, {
+          this.$bvToast.toast(`${error.response.data}`, {
             title: "Error!",
             variant: "warning",
             toaster: "b-toaster-top-center",

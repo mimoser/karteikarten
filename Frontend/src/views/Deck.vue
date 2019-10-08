@@ -29,7 +29,7 @@
                   <b-form-input
                     id="nested-title"
                     v-model="deck.title"
-                    :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+                    :disabled="deck.owner != $store.getters.user.id && deck._id"
                   ></b-form-input>
                 </b-form-group>
 
@@ -45,7 +45,7 @@
                     class="float_left"
                     v-model="deck.isPublic"
                     switch
-                    :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+                    :disabled="deck.owner != $store.getters.user.id && deck._id"
                   ></b-form-checkbox>
                 </b-form-group>
 
@@ -56,36 +56,36 @@
                   label-for="nested-tags"
                   class="mb-0"
                 >
+                  <!-- disabled needs boolean -->
                   <vue-tags-input
                     v-model="tag"
                     :tags="deck.tags"
                     @tags-changed="newTags => deck.tags = newTags"
-                    :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+                    :disabled="deck.owner != $store.getters.user.id && deck._id !== undefined"
                   />
                 </b-form-group>
               </b-col>
             </b-row>
-            <b-row align-h="start" v-if="deck.owner === $store.getters.user.id || creatingNew">
+            <b-row align-h="start" v-if="(deck.owner === $store.getters.user.id || !deck._id)">
               <b-button
                 size="sm"
                 pill
                 variant="outline-secondary"
                 @click="onSaveDeck"
-                :disabled="(deck.owner !== $store.getters.user.id && deck._id)  || (deck.title === null || deck.title === '') "
+                :disabled="(deck.title === null || deck.title === '') "
               >Deck speichern</b-button>
               <b-button
                 size="sm"
                 pill
                 variant="outline-secondary"
                 @click="onDeleteDeck"
-                :disabled="(deck.owner !== $store.getters.user.id && creatingNew)  || (deck.title === null || deck.title === '') "
+                :disabled="!deck._id "
               >Deck löschen</b-button>
               <b-button
                 size="sm"
                 pill
                 variant="outline-secondary"
                 v-b-modal.cardeditor-modal-center
-                :disabled="deck.owner != $store.getters.user.id  && !creatingNew"
               >Neue Karte hinzufügen</b-button>
             </b-row>
             <b-row v-else>
@@ -122,8 +122,8 @@
 
                     <b-dropdown id="options-dropdown" text="Aktionen" class="m-md-2">
                       <b-dropdown-item
+                        v-if="deck.owner === $store.getters.user.id || !deck._id"
                         @click="onEditCard(card)"
-                        :disabled="deck.owner != $store.getters.user.id && !creatingNew"
                         v-b-modal.update-cardeditor-modal-center
                       >Bearbeiten</b-dropdown-item>
                       <b-dropdown-item
@@ -134,10 +134,10 @@
                         v-b-modal.copy-cards-modal
                         @click="onCopyAllCards(deck.cards)"
                       >Alle Karten zu einem anderen Deck kopieren</b-dropdown-item>
-                      <b-dropdown-divider></b-dropdown-divider>
+                      <b-dropdown-divider v-if="deck.owner === $store.getters.user.id || !deck._id"></b-dropdown-divider>
                       <b-dropdown-item
+                        v-if="deck.owner === $store.getters.user.id || !deck._id"
                         @click="onDeleteCard(card)"
-                        :disabled="deck.owner != $store.getters.user.id && !creatingNew"
                       >Löschen</b-dropdown-item>
                     </b-dropdown>
                   </b-row>
@@ -299,7 +299,6 @@ export default {
   data() {
     return {
       loading: true,
-      creatingNew: false,
       editorSettings: {
         modules: {
           imageDrop: true,
@@ -357,10 +356,8 @@ export default {
 
     if (this.$route.params.id) {
       this.fetchDeck();
-      this.creatingNew = false;
     } else {
       this.loading = false;
-      this.creatingNew = true;
     }
     this.cardsTableProps.items = this.deck.cards;
     this.fire = Fire;
@@ -382,6 +379,12 @@ export default {
         .dispatch("fetchDeck", this.$route.params.id)
         .then(response => {
           that.deck = response.data;
+          // format tags to required format for v--tags-input
+          let tags = new Array();
+          for (let tag of that.deck.tags) {
+            tags.push({ text: tag });
+          }
+          that.deck.tags = tags;
           this.isSubriber();
 
           that.cardsTableProps.items = that.deck.cards;
@@ -456,6 +459,7 @@ export default {
         .then(response => {
           if (response.data._id) {
             this.deck._id = response.data._id;
+            this.deck.owner = response.data.owner;
             this.$store.dispatch("fetchUserDecks").then(() => {
               this.$bvToast.toast(`Deck saved`, {
                 title: "Deck saved",

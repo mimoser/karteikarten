@@ -8,7 +8,7 @@ module.exports = {
     importDeck: function async(req, res) {
         try {
             console.log("Import start");
-            // console.log("file", req.file);
+            console.log("file", req.file);
             fs.readFile(req.file.path, (err, data) => {
                 if (err) {
                     console.log(err);
@@ -32,14 +32,18 @@ module.exports = {
                         for (let card of jsonData.cards) {
                             let question = card.question;
                             let answer = card.answer;
+
                             // check if URL links are in question or answer
-                            if (question.indexOf('http') >= 0 || answer.indexOf('http') >= 0) {
-                                cardError = cardError + "Error in card number " + i + ".Img Urls are not allowed! \n"
-                            }
-                            // check if img is not base 64 encoded
-                            if ((question.indexOf("<img src=") >= 0 && !question.indexOf("http") >= 0) || (answer.indexOf("<img src=") >= 0 && !answer.indexOf("http") >= 0)) {
-                                if (!question.indexOf("base64") >= 0 && !answer.indexOf("base64") >= 0) {
-                                    cardError = cardError + "Error in card number " + i + ".Img need to be encoded in base 64! \n"
+                            if ((question.indexOf('http://') >= 0 && question.indexOf('https://') >= 0) || (answer.indexOf('http://') >= 0 && answer.indexOf('https://') >= 0)) {
+                                cardError = cardError + "Fehler in Karte " + (i + 1) + ".Img Urls sind nicht erlaubt! \n"
+                            } else {
+                                // check if img is not base 64 encoded
+                                if (question.indexOf("<img src=") >= 0 && question.indexOf(";base64") < 0) {
+                                    cardError = cardError + "Fehler in Karte " + (i + 1) + ".Img Fragen müssen in base 64 encoded sein! \n"
+                                }
+
+                                if (answer.indexOf("<img src=") >= 0 && answer.indexOf(";base64") < 0) {
+                                    cardError = cardError + "Fehler in Karte " + (i + 1) + ".Img Antworten müssen in base64 encoded sein! \n"
                                 }
                             }
                             if (cardError === '') {
@@ -51,6 +55,7 @@ module.exports = {
                         }
                         // send error message. User should change his file.
                         if (cardError !== '') {
+                            console.log(cardError);
                             console.log("Import end");
                             res.status(406).send(cardError);
                         } else {
