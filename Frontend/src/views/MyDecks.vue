@@ -144,8 +144,12 @@ export default {
     setRating(rating, deckId) {
       this.$store
         .dispatch("rateDeck", { deckId: deckId, rating: rating })
-        .then(() => {})
-        .catch(() => {});
+        .then((res) => {
+          
+        })
+        .catch((err) => {
+
+        });
     },
     difficulty(difficultyNumber) {
       var difficultyString;

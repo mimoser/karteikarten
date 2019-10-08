@@ -215,8 +215,12 @@ const store = new Vuex.Store({
                 axios
                     .post(`http://localhost:3000/api/ratedeck/${rate.deckId}`, { rating: rate.rating })
                     .then(res => {
-                        console.log(res);
-                        resolve(res);
+                        context.dispatch("fetchUserDecks").then(result => {
+                            resolve(res);
+                        }).catch(error => {
+                            console.log(error);
+                            reject(error);
+                        })
                     })
                     .catch(error => {
                         console.log(error);
