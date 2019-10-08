@@ -7,8 +7,8 @@ export default {
   name: "card",
   data() {
     return {
-        question: "Question",
-        answer: "Answer"
+      question: "Frage",
+      answer: "Antwort"
     };
   }
 };

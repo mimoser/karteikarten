@@ -13,24 +13,21 @@ module.exports = {
         let maxDecks = 0;
 
         // conditions object
-        console.log(req.query.search);
         var conditions = {};
         var and_clauses = []; // filter the search by any criteria given by the user
         and_clauses.push({ 'isPublic': true });
         if (req.query.search !== undefined && req.query.search !== 'null' && req.query.search !== "") {
-            console.log(req.query.search);
             const search = ".*" + req.query.search + ".*";
             and_clauses.push({ tags: { $regex: search } });
         }
         if (and_clauses.length > 0) {
             conditions['$and'] = and_clauses;
         }
+        // count how many decks exists with filter
         Deck.find(conditions).countDocuments().then(count => {
-            console.log("here", count);
             if (count > 0) {
                 maxDecks = count;
                 Deck.find(conditions).skip(offset).limit(pagesize).populate({ path: "owner" }).populate({ path: "cards" }).then(publicDecks => {
-
                     if (publicDecks) {
                         let decks = new Array();
                         publicDecks.forEach(deck => {
@@ -123,8 +120,6 @@ module.exports = {
     },
 
     addDeck: function (req, res) {
-        console.log(req.body);
-
         User.findOne(
             { email: req.payload.email }
         ).then(user => {
@@ -156,7 +151,7 @@ module.exports = {
             deck.save().then(deck => {
                 user.decks.push(deck);
                 user.save().then(user => {
-                    res.status(200).json({ _id: deck.id });
+                    res.status(200).json({ _id: deck.id, owner: deck.owner._id });
                 }, error => {
                     console.log(error);
                     res.status(500).send(error);
@@ -177,8 +172,6 @@ module.exports = {
 
         Deck.findOne({ _id: deckId }).then(deck => {
             if (deck) {
-                console.log(deck);
-
                 deck.title = req.body.deck.title;
                 deck.averageRating = req.body.deck.averageRating;
                 deck.isPublic = req.body.deck.isPublic;
@@ -197,7 +190,6 @@ module.exports = {
                 for (var i = 0; i < deck.cards.length; i++) {
                     cardsInDB.push(deck.cards[i]._id.toString())
                 }
-
 
                 for (var i = 0; i < req.body.deck.cards.length; i++) {
                     if (req.body.deck.cards[i]._id == null) {
@@ -243,35 +235,6 @@ module.exports = {
                 }).catch(error => {
                     console.log(error);
                 });
-
-
-
-                // cardsInDB.forEach(async cardId => {
-                //     if (!cardsToUpdate.includes(cardId)) {
-                //         // cardsToDelete.push(cardId);
-                //         await Card.findOneAndDelete({ _id: cardId }).then(async card=> {
-                //             await deck.cards.pop(card);
-                //         });
-                //     }
-                // });
-
-                // cardsToUpdate.forEach(async cardId => {
-                //     var card = req.body.deck.cards.find(card => card._id === cardId);
-                //     await Card.findOneAndUpdate({ _id: cardId }, card, { new: true });
-                // });
-
-                // for (var i = 0; i < newCards.length; i++) {
-                //     let c = new Card({ question: newCards[i].question, answer: newCards[i].answer, difficulty: newCards[i].difficulty });
-                //     c.save();
-                //     deck.cards.push(c);
-                // }
-
-                // deck.save().then(savedDeck => {
-                //     res.status(200).json(savedDeck);
-                // }).catch(error => {
-                //     res.status(500).send();
-                // })
-
             } else {
                 res.sendStatus(404);
             }
@@ -357,13 +320,7 @@ module.exports = {
         }).catch(error => {
 
         });
-        // Deck.findOne({_id: deckId}).then(deck => {
-
-        // }).catch(error => {
-
-        // });
     },
-    // TODO check if user is subscriber
     subscribeDeck: function (req, res) {
         var deckId = req.params.deckId;
         User.findOne({ email: req.payload.email }).then(user => {
@@ -388,7 +345,6 @@ module.exports = {
         })
 
     },
-    // TODO check if user is subscriber
     unsubscribeDeck: function (req, res) {
 
         var deckId = req.params.deckId;

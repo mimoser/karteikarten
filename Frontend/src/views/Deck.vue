@@ -29,7 +29,7 @@
                   <b-form-input
                     id="nested-title"
                     v-model="deck.title"
-                    :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+                    :disabled="deck.owner != $store.getters.user.id && deck._id"
                   ></b-form-input>
                 </b-form-group>
 
@@ -42,9 +42,10 @@
                 >
                   <b-form-checkbox
                     id="nested-public"
+                    class="float_left"
                     v-model="deck.isPublic"
                     switch
-                    :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+                    :disabled="deck.owner != $store.getters.user.id && deck._id"
                   ></b-form-checkbox>
                 </b-form-group>
 
@@ -55,36 +56,36 @@
                   label-for="nested-tags"
                   class="mb-0"
                 >
+                  <!-- disabled needs boolean -->
                   <vue-tags-input
                     v-model="tag"
                     :tags="deck.tags"
                     @tags-changed="newTags => deck.tags = newTags"
-                    :disabled="deck.owner != $store.getters.user.id && !creatingNew"
+                    :disabled="deck.owner != $store.getters.user.id && deck._id !== undefined"
                   />
                 </b-form-group>
               </b-col>
             </b-row>
-            <b-row align-h="start" v-if="deck.owner === $store.getters.user.id || creatingNew">
+            <b-row align-h="start" v-if="(deck.owner === $store.getters.user.id || !deck._id)">
               <b-button
                 size="sm"
                 pill
                 variant="outline-secondary"
                 @click="onSaveDeck"
-                :disabled="(deck.owner !== $store.getters.user.id && deck._id)  || (deck.title === null || deck.title === '') "
+                :disabled="(deck.title === null || deck.title === '') "
               >Deck speichern</b-button>
               <b-button
                 size="sm"
                 pill
                 variant="outline-secondary"
                 @click="onDeleteDeck"
-                :disabled="(deck.owner !== $store.getters.user.id && creatingNew)  || (deck.title === null || deck.title === '') "
+                :disabled="!deck._id "
               >Deck löschen</b-button>
               <b-button
                 size="sm"
                 pill
                 variant="outline-secondary"
                 v-b-modal.cardeditor-modal-center
-                :disabled="deck.owner != $store.getters.user.id  && !creatingNew"
               >Neue Karte hinzufügen</b-button>
             </b-row>
             <b-row v-else>
@@ -121,8 +122,8 @@
 
                     <b-dropdown id="options-dropdown" text="Aktionen" class="m-md-2">
                       <b-dropdown-item
+                        v-if="deck.owner === $store.getters.user.id || !deck._id"
                         @click="onEditCard(card)"
-                        :disabled="deck.owner != $store.getters.user.id && !creatingNew"
                         v-b-modal.update-cardeditor-modal-center
                       >Bearbeiten</b-dropdown-item>
                       <b-dropdown-item
@@ -133,10 +134,10 @@
                         v-b-modal.copy-cards-modal
                         @click="onCopyAllCards(deck.cards)"
                       >Alle Karten zu einem anderen Deck kopieren</b-dropdown-item>
-                      <b-dropdown-divider></b-dropdown-divider>
+                      <b-dropdown-divider v-if="deck.owner === $store.getters.user.id || !deck._id"></b-dropdown-divider>
                       <b-dropdown-item
+                        v-if="deck.owner === $store.getters.user.id || !deck._id"
                         @click="onDeleteCard(card)"
-                        :disabled="deck.owner != $store.getters.user.id && !creatingNew"
                       >Löschen</b-dropdown-item>
                     </b-dropdown>
                   </b-row>
@@ -157,14 +158,14 @@
         id="cardeditor-modal-center"
         centered
         size="xl"
-        title="New Card"
+        title="Neue Karte"
         @ok="onAddCard"
         ok-title="OK"
       >
         <b-container fluid>
           <b-row>
             <b-col>
-              <h4>Question</h4>
+              <h4>Frage</h4>
               <vue-editor
                 id="question-editor"
                 :editorOptions="editorSettings"
@@ -173,7 +174,7 @@
                 @imageAdded="handleImageAdded"
                 :editorToolbar="editorSettings.toolbar"
               ></vue-editor>
-              <h4>Answer</h4>
+              <h4>Antwort</h4>
               <vue-editor
                 id="answer-editor"
                 :editorOptions="editorSettings"
@@ -275,9 +276,7 @@
 </template>
 
 <script>
-import Cardeditor from "../components/CardEditor";
 import VueTagsInput from "@johmun/vue-tags-input";
-import axios from "axios";
 import Quill from "quill";
 
 import { VueEditor } from "vue2-editor";
@@ -293,7 +292,6 @@ Quill.register("modules/imageResize", ImageResize);
 export default {
   name: "deck",
   components: {
-    Cardeditor,
     VueEditor,
     VueTagsInput,
     FaRating
@@ -301,7 +299,6 @@ export default {
   data() {
     return {
       loading: true,
-      creatingNew: false,
       editorSettings: {
         modules: {
           imageDrop: true,
@@ -359,17 +356,14 @@ export default {
 
     if (this.$route.params.id) {
       this.fetchDeck();
-      this.creatingNew = false;
     } else {
       this.loading = false;
-      this.creatingNew = true;
     }
     this.cardsTableProps.items = this.deck.cards;
     this.fire = Fire;
   },
   methods: {
     getOwnerDecks() {
-      var that = this;
       var ownerDecks = [];
       for (var i = 0; i < this.$store.getters.userDecks.decks.length; i++) {
         var d = this.$store.getters.userDecks.decks[i];
@@ -385,12 +379,18 @@ export default {
         .dispatch("fetchDeck", this.$route.params.id)
         .then(response => {
           that.deck = response.data;
+          // format tags to required format for v--tags-input
+          let tags = new Array();
+          for (let tag of that.deck.tags) {
+            tags.push({ text: tag });
+          }
+          that.deck.tags = tags;
           this.isSubriber();
 
           that.cardsTableProps.items = that.deck.cards;
           that.loading = false;
         })
-        .catch(error => {
+        .catch(() => {
           this.$bvToast.toast(`Deck konnte nicht heruntergeladen werden.`, {
             title: "Problem beim Herunterladen",
             variant: "warning",
@@ -423,7 +423,6 @@ export default {
 
       var image = new Image();
       image.onload = function() {
-        var maxWidth = 250;
         var maxHeight = 250;
         var ratio = Math.min(maxHeight / this.width, maxHeight / this.height);
         var width = this.width * ratio;
@@ -460,7 +459,8 @@ export default {
         .then(response => {
           if (response.data._id) {
             this.deck._id = response.data._id;
-            this.$store.dispatch("fetchUserDecks").then(response => {
+            this.deck.owner = response.data.owner;
+            this.$store.dispatch("fetchUserDecks").then(() => {
               this.$bvToast.toast(`Deck saved`, {
                 title: "Deck saved",
                 variant: "info",
@@ -471,7 +471,7 @@ export default {
             });
           }
         })
-        .catch(error => {
+        .catch(() => {
           this.$bvToast.toast(`Das Deck konnte nicht gespeichert werden.`, {
             title: "Es gab ein Problem beim Speichern",
             variant: "warning",
@@ -484,8 +484,8 @@ export default {
     onDeleteDeck() {
       this.$store
         .dispatch("deleteDeck", this.deck._id)
-        .then(response => {
-          this.$store.dispatch("fetchUserDecks").then(response => {
+        .then(() => {
+          this.$store.dispatch("fetchUserDecks").then(() => {
             this.$bvToast.toast(`Deck wurde gelöscht.`, {
               title: "Deck gelöscht!.",
               variant: "info",
@@ -500,7 +500,7 @@ export default {
             }, 3000);
           });
         })
-        .catch(error => {
+        .catch(() => {
           this.$bvToast.toast(
             `Es gab ein Problem beim Löschen. Bitte probieren Sie es erneut.`,
             {
@@ -579,8 +579,8 @@ export default {
           deckId: this.deckToCopyTo.id,
           cards: this.cardsToCopy
         })
-        .then(res => {})
-        .catch(err => {});
+        .then(() => {})
+        .catch(() => {});
       // empty cardsToCopy
       this.clearCardsToCopy();
     },
@@ -595,7 +595,7 @@ export default {
       if (!this.sub) {
         this.$store
           .dispatch("subscribeDeck", this.deck._id)
-          .then(res => {
+          .then(() => {
             this.$bvToast.toast(`Deck erfolgreich abonniert.`, {
               title: "Abonnieren erfolgreich!",
               variant: "success",
@@ -604,7 +604,7 @@ export default {
               appendToast: true
             });
           })
-          .catch(error => {
+          .catch(() => {
             this.$bvToast.toast(`Deck konnte nicht abonniert werden.`, {
               title: "Abonnieren fehlgeschlagen!",
               variant: "danger",
@@ -625,7 +625,7 @@ export default {
               appendToast: true
             });
           })
-          .catch(error => {
+          .catch(() => {
             this.$bvToast.toast(`Deck konnte nicht deabonniert werden.`, {
               title: "Deabonnieren fehlgeschlagen!",
               variant: "danger",
@@ -642,5 +642,9 @@ export default {
 <style>
 h4 {
   text-align: center;
+}
+.float_left {
+  margin-top: 6px;
+  float: left;
 }
 </style>

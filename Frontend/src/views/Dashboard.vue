@@ -9,7 +9,7 @@
             v-on:change="getPublicDecks()"
           ></b-form-input>
           <b-input-group-append>
-            <b-button :disabled="!search" @click="search = ''">Clear</b-button>
+            <b-button :disabled="!search" @click="search = '';getPublicDecks()">Clear</b-button>
           </b-input-group-append>
         </b-input-group>
       </b-form-group>
@@ -109,7 +109,7 @@ export default {
           }
           this.loading = false;
         })
-        .catch(error => {
+        .catch(() => {
           this.loading = false;
           this.decks = [];
           this.$bvToast.toast(`Es konnte kein Deck gefunden werden.`, {

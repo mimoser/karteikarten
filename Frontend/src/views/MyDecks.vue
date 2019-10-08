@@ -17,7 +17,7 @@
                 @change="importDeck()"
                 ref="file"
               />
-              <label for="file" class="margin_null cursor">Import deck</label>
+              <label for="file" class="margin_null cursor">Deck importieren</label>
             </b-button>
           </div>
         </form>
@@ -35,7 +35,7 @@
             v-bind:key="deck.id"
             bg-variant="light"
             text-variant="black"
-            class="text-center"
+            class="text-center min_width"
             no-body
             header-tag="header"
             footer-tag="footer"
@@ -89,7 +89,6 @@
 </template>
 
 <script>
-import DeckEditor from "../views/DeckEditor";
 import { FaRating } from "vue-rate-it";
 import ThumbsUp from "vue-rate-it/glyphs/thumbs-up";
 import Fire from "vue-rate-it/glyphs/fire";
@@ -97,12 +96,11 @@ import axios from "axios";
 
 export default {
   components: {
-    DeckEditor,
     FaRating
   },
   data() {
     return {
-      decks: this.$store.getters.userDecks,
+      decks: null,
       thumbsUp: "",
       fire: "",
       fireColor: "#F5F03A",
@@ -125,13 +123,12 @@ export default {
       this.$router.push({ name: "learn", params: { id: deckId } });
     },
     fetchDecks() {
-      let that = this;
       this.$store
         .dispatch("fetchUserDecks")
         .then(response => {
           this.decks = response.data;
         })
-        .catch(error => {
+        .catch(() => {
           this.$bvToast.toast(`Couldn't fetch user decks`, {
             title: "Problem fetching user decks",
             variant: "warning",
@@ -145,15 +142,10 @@ export default {
       this.$router.push({ name: "deck" });
     },
     setRating(rating, deckId) {
-      console.log(`${deckId} -> ${rating}`);
       this.$store
         .dispatch("rateDeck", { deckId: deckId, rating: rating })
-        .then(res => {
-          console.log(res);
-        })
-        .catch(error => {
-          console.log(error);
-        });
+        .then(() => {})
+        .catch(() => {});
     },
     difficulty(difficultyNumber) {
       var difficultyString;
@@ -181,19 +173,32 @@ export default {
       formData.append("file", this.file);
       axios
         .post(`http://localhost:3000/api/import`, formData)
-        .then(response => {
+        .then(() => {
           // reset input form
           this.file = "";
           this.$refs.file.value = "";
+          this.$bvToast.toast(`Datei wurde erfolgreich importiert!`, {
+            title: "Import erfolgreich!",
+            variant: "success",
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+            appendToast: true
+          });
+          this.fetchDecks();
         })
         .catch(error => {
-          console.log(error);
           this.file = "";
           this.$refs.file.value = "";
+          this.$bvToast.toast(`${error.response.data}`, {
+            title: "Error!",
+            variant: "warning",
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+            appendToast: true
+          });
         });
     },
     exportDeck(deck) {
-      console.log(deck);
       const token = localStorage.getItem("access_token");
       axios.defaults.headers.common["Authorization"] = "Bearer " + token;
       axios({
@@ -240,5 +245,8 @@ export default {
   min-height: 2em;
   padding: 1em;
   cursor: pointer;
+}
+.min_width {
+  min-width: 300px;
 }
 </style>
