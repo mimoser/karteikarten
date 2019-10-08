@@ -158,14 +158,14 @@
         id="cardeditor-modal-center"
         centered
         size="xl"
-        title="New Card"
+        title="Neue Karte"
         @ok="onAddCard"
         ok-title="OK"
       >
         <b-container fluid>
           <b-row>
             <b-col>
-              <h4>Question</h4>
+              <h4>Frage</h4>
               <vue-editor
                 id="question-editor"
                 :editorOptions="editorSettings"
@@ -174,7 +174,7 @@
                 @imageAdded="handleImageAdded"
                 :editorToolbar="editorSettings.toolbar"
               ></vue-editor>
-              <h4>Answer</h4>
+              <h4>Antwort</h4>
               <vue-editor
                 id="answer-editor"
                 :editorOptions="editorSettings"

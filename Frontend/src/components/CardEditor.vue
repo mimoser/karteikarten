@@ -2,10 +2,20 @@
   <b-container fluid>
     <b-row>
       <b-col>
-          <h4>Question</h4>
-          <vue-editor id="question-editor" v-model="questionHtml" useCustomImageHandler @imageAdded="handleImageAdded"></vue-editor>
-          <h4>Answer</h4>
-          <vue-editor id="answer-editor" v-model="answerHtml" useCustomImageHandler @imageAdded="handleImageAdded"></vue-editor>
+        <h4>Frage</h4>
+        <vue-editor
+          id="question-editor"
+          v-model="questionHtml"
+          useCustomImageHandler
+          @imageAdded="handleImageAdded"
+        ></vue-editor>
+        <h4>Antwort</h4>
+        <vue-editor
+          id="answer-editor"
+          v-model="answerHtml"
+          useCustomImageHandler
+          @imageAdded="handleImageAdded"
+        ></vue-editor>
       </b-col>
     </b-row>
   </b-container>
@@ -28,21 +38,20 @@ export default {
   },
 
   methods: {
-    handleImageAdded: function (file, Editor, cursorLocation, resetUploader){
+    handleImageAdded: function(file, Editor, cursorLocation, resetUploader) {
       // may be the image needs to be resized before getting added
       // or some file extensions may be not allowed
       let fileReader = new FileReader();
       fileReader.readAsDataURL(file);
-      fileReader.onloadend = function(evt){
+      fileReader.onloadend = function(evt) {
         Editor.insertEmbed(cursorLocation, "image", evt.target.result);
         resetUploader();
-      }
+      };
     },
-    onSave(){
-          console.log("saved!");
-          // handle 
-          
-      }
+    onSave() {
+      console.log("saved!");
+      // handle
+    }
   }
 };
 </script>

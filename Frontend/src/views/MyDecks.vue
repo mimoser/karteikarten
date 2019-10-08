@@ -17,7 +17,7 @@
                 @change="importDeck()"
                 ref="file"
               />
-              <label for="file" class="margin_null cursor">Import deck</label>
+              <label for="file" class="margin_null cursor">Deck importieren</label>
             </b-button>
           </div>
         </form>

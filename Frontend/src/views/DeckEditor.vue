@@ -78,7 +78,7 @@
 <script>
 import Cardeditor from "../components/CardEditor";
 import { VueEditor } from "vue2-editor";
-import VueTagsInput from '@johmun/vue-tags-input';
+import VueTagsInput from "@johmun/vue-tags-input";
 
 export default {
   name: "deckEditor",
@@ -90,7 +90,7 @@ export default {
   data() {
     return {
       title: null,
-      tag: '',
+      tag: "",
       tags: [],
       isPublic: false,
       cards: [],
