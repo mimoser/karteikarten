@@ -5,10 +5,17 @@
     </div>
     <div v-else>
       <b-card class="outer_box">
+        <b-card-header>
+          <b-row align-h="between">
+            <b-col>Karten insgesamt: {{cardsToLearn.length}}</b-col>
+            <b-col>Karten zu wiederholen: {{repeatCards.length}}</b-col>
+            <b-col>Karten gewusst: {{knownCards.length}}</b-col>
+          </b-row>
+        </b-card-header>
         <b-card class="no_border">
           <h2>Frage</h2>
           <b-card-text>
-            <h5 v-html="cardsToLearn[randomLearnNumber].question"></h5>
+            <h5 v-html="currentCardToLearn.question"></h5>
           </b-card-text>
           <b-button v-if="!showAnswer" variant="primary" @click="showAnswer = true">Antwort anzeigen</b-button>
         </b-card>
@@ -17,15 +24,12 @@
           <b-card class="no_border">
             <h2>Anwort</h2>
             <b-card-text>
-              <h5 v-html="cardsToLearn[randomLearnNumber].answer"></h5>
+              <h5 v-html="currentCardToLearn.answer"></h5>
             </b-card-text>
             <b-button-group>
-              <b-button variant="success" @click="known(cardsToLearn[randomLearnNumber])">Gewusst</b-button>
+              <b-button variant="success" @click="known(currentCardToLearn)">Gewusst</b-button>
               <!-- <b-button variant="primary" @click="showAnswer = true">Nicht gewusst</b-button> -->
-              <b-button
-                variant="danger"
-                @click="repeat(repeat(cardsToLearn[randomLearnNumber]))"
-              >Wiederholen</b-button>
+              <b-button variant="danger" @click="repeat(currentCardToLearn)">Wiederholen</b-button>
             </b-button-group>
           </b-card>
         </div>
@@ -55,12 +59,12 @@ export default {
       cardsToLearn: [],
       knownCards: [],
       repeatCards: [],
-      randomLearnNumber: 0,
+      currentCardToLearn: {},
       showAnswer: false,
       loading: true
     };
   },
-  mounted() {
+  created() {
     this.fetchDeck();
   },
   methods: {
@@ -71,9 +75,9 @@ export default {
         .then(response => {
           this.deck = response.data;
           this.cardsToLearn.push(...this.deck.cards);
-          this.randomLearnNumber = Math.floor(
-            Math.random() * this.cardsToLearn.length
-          );
+          this.currentCardToLearn = this.cardsToLearn[
+            Math.floor(Math.random() * this.cardsToLearn.length)
+          ];
           this.loading = false;
         })
         .catch(error => {
@@ -87,42 +91,53 @@ export default {
         });
     },
     known(card) {
-      // put cards into knownCards Array for Statics
-      this.knownCards.push(card);
-      // filter card out of possible nextcards
-      this.cardsToLearn = this.cardsToLearn.filter(tmp => tmp._id !== card._id);
-      // calculate next random card
       if (this.cardsToLearn.length > 0) {
-        this.randomLearnNumber = Math.floor(
-          Math.random() * this.cardsToLearn.length
+        this.cardsToLearn = this.cardsToLearn.filter(
+          tmp => tmp._id !== card._id
         );
       } else {
-        // if last card was learned
-        this.$bvToast.toast(`Alle Karten wurden gerlent.`, {
+        this.repeatCards = this.repeatCards.filter(tmp => tmp._id !== card._id);
+      } 
+      if(this.cardsToLearn.length===0 && this.repeatCards.length===0) {
+        this.$bvToast.toast(`Alle Karten wurden gelernt.`, {
           title: "Lernen beendet!",
           variant: "success",
           toaster: "b-toaster-top-center",
           autoHideDelay: 1500,
           appendToast: true
         });
-        // get back
 
+        // get back
         let that = this;
         this.loading = true;
         setTimeout(function() {
           that.$router.push({ name: "mydecks" });
         }, 3000);
       }
+      this.knownCards.push(card);
+      this.setNextCardToLearn();
       this.showAnswer = false;
     },
     repeat(card) {
-      // put cards into repeatCards Array for Statics
-      this.repeatCards.push(card);
-      // calculate next random card
-      this.randomLearnNumber = Math.floor(
-        Math.random() * this.cardsToLearn.length
-      );
       this.showAnswer = false;
+      if (this.cardsToLearn.length > 0) {
+        this.cardsToLearn = this.cardsToLearn.filter(
+          tmp => tmp._id !== card._id
+        );
+        this.repeatCards.push(card);
+      }
+      this.setNextCardToLearn();
+    },
+    setNextCardToLearn() {
+      if (this.cardsToLearn.length > 0) {
+        this.currentCardToLearn = this.cardsToLearn[
+          Math.floor(Math.random() * this.cardsToLearn.length)
+        ];
+      } else if (this.repeatCards.length > 0) {
+        this.currentCardToLearn = this.repeatCards[
+          Math.floor(Math.random() * this.repeatCards.length)
+        ];
+      }
     }
   }
 };

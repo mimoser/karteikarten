@@ -47,7 +47,7 @@
                   <fa-rating
                     :glyph="thumbsUp"
                     :read-only="(deck.owner===$store.getters.user.id)?true:false"
-                    :increment="1"
+                    :increment="0.5"
                     :item-size="15"
                     :rating="deck.averageRating"
                     @rating-selected="setRating($event, deck.id)"
@@ -145,7 +145,7 @@ export default {
       this.$store
         .dispatch("rateDeck", { deckId: deckId, rating: rating })
         .then((res) => {
-          
+
         })
         .catch((err) => {
 

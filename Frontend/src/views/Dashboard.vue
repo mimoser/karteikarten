@@ -28,13 +28,13 @@
                 </p>
                 <div class="same-row">
                   <span>
-                    <starRating
-                      float="right"
-                      :star-size="20"
+                    <fa-rating
+                      :glyph="thumbsUp"
                       :read-only="true"
-                      :increment="0.01"
+                      :increment="0.5"
+                      :item-size="15"
                       :rating="deck.averageRating"
-                    ></starRating>
+                    ></fa-rating>
                   </span>
                   <span>{{deck.numberOfSubscribers}} Abonnenten</span>
                 </div>
@@ -60,15 +60,17 @@
 </template>
 
 <script>
-import StarRating from "vue-star-rating";
+import { FaRating } from "vue-rate-it";
+import ThumbsUp from "vue-rate-it/glyphs/thumbs-up";
 import axios from "axios";
 
 export default {
   components: {
-    StarRating
+    FaRating
   },
   data() {
     return {
+      thumbsUp: "",
       currentPage: 1,
       maxDecks: 0,
       pageSize: 5,
@@ -77,16 +79,13 @@ export default {
       loading: false
     };
   },
+  created() {
+    this.thumbsUp = ThumbsUp;
+  },
   mounted() {
     this.getPublicDecks();
   },
   methods: {
-    showCurrentRating: function(rating) {
-      this.currentRating =
-        rating === 0
-          ? this.currentSelectedRating
-          : "Click to select " + rating + " stars";
-    },
     getPublicDecks: function() {
       this.loading = true;
       const token = localStorage.getItem("access_token");

@@ -139,7 +139,6 @@ module.exports = {
                 title: req.body.deck.title,
                 cards: cards,
                 isPublic: req.body.deck.isPublic,
-                averageRating: req.body.deck.averageRating,
                 subscribers: subscribers,
                 tags: new Array()
             });
@@ -173,7 +172,6 @@ module.exports = {
         Deck.findOne({ _id: deckId }).then(deck => {
             if (deck) {
                 deck.title = req.body.deck.title;
-                deck.averageRating = req.body.deck.averageRating;
                 deck.isPublic = req.body.deck.isPublic;
 
                 var tags = Array.prototype.slice.call(req.body.deck.tags);
